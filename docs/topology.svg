@@ -1,0 +1,82 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 640" font-family="Segoe UI, Tahoma, sans-serif">
+  <defs>
+    <style>
+      .node { fill:#16213e; stroke:#4fc3f7; stroke-width:1.5; rx:8; }
+      .spine { stroke:#ce93d8; }
+      .lbl { fill:#e0e0e0; font-size:15px; font-weight:600; text-anchor:middle; }
+      .sub { fill:#9e9e9e; font-size:11px; text-anchor:middle; }
+      .link { stroke:#2a2a4a; stroke-width:1.6; }
+      .grp { fill:none; stroke-dasharray:6 4; stroke-width:1.5; rx:14; }
+      .gt { font-size:13px; font-weight:600; text-anchor:middle; }
+      .host { fill:#0f0f23; stroke:#66bb6a; stroke-width:1; rx:5; }
+      .ht { fill:#9e9e9e; font-size:10px; text-anchor:middle; }
+    </style>
+  </defs>
+  <rect width="1000" height="640" fill="#1a1a2e"/>
+  <text x="500" y="30" class="lbl" font-size="18">VXLAN EVPN Multi-AS Fabric — NX-OS 10.5(3) / CML 2.10</text>
+
+  <!-- links spine-leaf (full mesh 2x4) -->
+  <g class="link">
+    <line x1="380" y1="120" x2="160" y2="240"/><line x1="380" y1="120" x2="400" y2="240"/>
+    <line x1="380" y1="120" x2="620" y2="240"/><line x1="380" y1="120" x2="850" y2="240"/>
+    <line x1="620" y1="120" x2="160" y2="240"/><line x1="620" y1="120" x2="400" y2="240"/>
+    <line x1="620" y1="120" x2="620" y2="240"/><line x1="620" y1="120" x2="850" y2="240"/>
+  </g>
+
+  <!-- spines -->
+  <rect x="310" y="80" width="140" height="46" class="node spine"/>
+  <text x="380" y="100" class="lbl">Spine-1</text>
+  <text x="380" y="116" class="sub">AS 65000 · lo0 100.1.1.1</text>
+  <rect x="550" y="80" width="140" height="46" class="node spine"/>
+  <text x="620" y="100" class="lbl">Spine-2</text>
+  <text x="620" y="116" class="sub">AS 65000 · lo0 100.1.1.2</text>
+
+  <!-- leaves -->
+  <rect x="90" y="240" width="140" height="46" class="node"/>
+  <text x="160" y="260" class="lbl">Leaf-1</text>
+  <text x="160" y="276" class="sub">AS 65001 · lo0 1.1.1.1</text>
+  <rect x="330" y="240" width="140" height="46" class="node"/>
+  <text x="400" y="260" class="lbl">Leaf-2</text>
+  <text x="400" y="276" class="sub">AS 65002 · lo0 2.2.2.2</text>
+  <rect x="550" y="240" width="140" height="46" class="node"/>
+  <text x="620" y="260" class="lbl">Leaf-3</text>
+  <text x="620" y="276" class="sub">AS 65003 · lo0 3.3.3.3</text>
+  <rect x="780" y="240" width="140" height="46" class="node"/>
+  <text x="850" y="260" class="lbl">Leaf-4</text>
+  <text x="850" y="276" class="sub">AS 65004 · lo0 4.4.4.4</text>
+
+  <!-- DHCP server -->
+  <line x1="60" y1="200" x2="120" y2="240" class="link"/>
+  <rect x="10" y="170" width="110" height="36" class="node" style="stroke:#ff9800"/>
+  <text x="65" y="186" class="lbl" font-size="12">DHCP-SERVER</text>
+  <text x="65" y="200" class="sub">IOL · trunk E1/3</text>
+
+  <!-- customer groups -->
+  <rect x="60" y="340" width="270" height="120" class="grp" stroke="#4fc3f7"/>
+  <text x="195" y="362" class="gt" fill="#4fc3f7">Customer-A · VLAN 10/20 · L3VNI 50000</text>
+  <rect x="90"  y="380" width="90" height="30" class="host"/><text x="135" y="399" class="ht">host-1 · vlan10</text>
+  <rect x="200" y="380" width="90" height="30" class="host"/><text x="245" y="399" class="ht">host-2 · vlan10</text>
+  <rect x="90"  y="420" width="90" height="30" class="host"/><text x="135" y="439" class="ht">desktop-3 · vlan20</text>
+  <rect x="200" y="420" width="90" height="30" class="host"/><text x="245" y="439" class="ht">host-4 · vlan20</text>
+
+  <rect x="370" y="340" width="270" height="120" class="grp" stroke="#66bb6a"/>
+  <text x="505" y="362" class="gt" fill="#66bb6a">Customer-B · VLAN 30/40 · L3VNI 50001</text>
+  <rect x="400" y="380" width="90" height="30" class="host"/><text x="445" y="399" class="ht">desktop-0 · vlan30</text>
+  <rect x="510" y="380" width="90" height="30" class="host"/><text x="555" y="399" class="ht">desktop-1 · vlan30</text>
+  <rect x="400" y="420" width="90" height="30" class="host"/><text x="445" y="439" class="ht">desktop-4 · vlan40</text>
+  <rect x="510" y="420" width="90" height="30" class="host"/><text x="555" y="439" class="ht">desktop-5 · vlan40</text>
+
+  <rect x="680" y="340" width="270" height="120" class="grp" stroke="#ce93d8"/>
+  <text x="815" y="362" class="gt" fill="#ce93d8">Customer-C · VLAN 50/60 · L3VNI 50002</text>
+  <rect x="710" y="380" width="90" height="30" class="host"/><text x="755" y="399" class="ht">desktop-12 · vlan50</text>
+  <rect x="820" y="380" width="90" height="30" class="host"/><text x="865" y="399" class="ht">desktop-13 · vlan50</text>
+  <rect x="710" y="420" width="90" height="30" class="host"/><text x="755" y="439" class="ht">desktop-6 · vlan60</text>
+  <rect x="820" y="420" width="90" height="30" class="host"/><text x="865" y="439" class="ht">desktop-7 · vlan60</text>
+
+  <!-- legend -->
+  <rect x="60" y="500" width="880" height="110" rx="10" fill="#16213e" stroke="#2a2a4a"/>
+  <text x="80" y="527" fill="#4fc3f7" font-size="13" font-weight="600">Design</text>
+  <text x="80" y="549" fill="#e0e0e0" font-size="12">• eBGP underlay+overlay (Multi-AS, RFC 7938): leaves AS 65001-65004, spines AS 65000 — no IGP, no RR</text>
+  <text x="80" y="569" fill="#e0e0e0" font-size="12">• Spines: VRF-less EVPN transit — retain route-target all · send-community extended · next-hop unchanged</text>
+  <text x="80" y="589" fill="#e0e0e0" font-size="12">• Symmetric IRB, distributed anycast gateway (0000.1111.2222), VRF-aware DHCP relay, RT scheme 65000:&lt;VNI&gt;</text>
+</svg>

@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VXLAN EVPN Multi-AS Fabric Lab — Documentation</title>
+<style>
+:root{
+  --bg-dark:#1a1a2e;--bg-card:#16213e;--bg-code:#0f0f23;
+  --accent-blue:#4fc3f7;--accent-green:#66bb6a;--accent-orange:#ff9800;
+  --accent-red:#ef5350;--accent-purple:#ce93d8;
+  --text-primary:#e0e0e0;--text-secondary:#9e9e9e;--border:#2a2a4a;
+  --sidebar-width:280px;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;background:var(--bg-dark);
+  color:var(--text-primary);line-height:1.7}
+.sidebar{width:var(--sidebar-width);background:#12122a;border-right:1px solid var(--border);
+  height:100vh;overflow-y:auto;position:fixed;top:0;left:0;z-index:100}
+.sidebar-header{padding:20px 18px 12px;border-bottom:1px solid var(--border)}
+.sidebar-header h1{font-size:1.15em;color:var(--accent-blue)}
+.sidebar-header .subtitle{font-size:.72em;color:var(--text-secondary);line-height:1.5}
+.sidebar nav{padding:12px 0}
+.sidebar nav a{display:block;color:var(--text-secondary);text-decoration:none;
+  padding:6px 18px;font-size:.85em;border-left:3px solid transparent;transition:all .2s}
+.sidebar nav a:hover{color:var(--text-primary);background:rgba(79,195,247,.05)}
+.sidebar nav .navgrp{padding:12px 18px 4px;font-size:.68em;letter-spacing:.12em;
+  text-transform:uppercase;color:#5a5a7a}
+.sidebar-footer{padding:14px 18px;border-top:1px solid var(--border);font-size:.75em}
+.sidebar-footer a{color:var(--accent-blue);text-decoration:none}
+.content{margin-left:var(--sidebar-width);padding:36px 48px;max-width:1150px}
+section{margin-bottom:56px;scroll-margin-top:20px}
+h2{color:var(--accent-blue);font-size:1.55em;margin-bottom:14px;
+  border-bottom:1px solid var(--border);padding-bottom:8px}
+h3{color:var(--accent-purple);font-size:1.12em;margin:22px 0 8px}
+p{margin-bottom:10px}
+.card{background:var(--bg-card);border:1px solid var(--border);border-radius:10px;
+  padding:18px 22px;margin:14px 0}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media(max-width:1000px){.grid2{grid-template-columns:1fr}.content{padding:24px}}
+@media(max-width:800px){.sidebar{display:none}.content{margin-left:0}}
+table{border-collapse:collapse;width:100%;margin:12px 0;font-size:.9em}
+th{background:#12122a;color:var(--accent-blue);text-align:left}
+th,td{border:1px solid var(--border);padding:7px 12px}
+tr:nth-child(even){background:rgba(255,255,255,.02)}
+code{background:var(--bg-code);color:var(--accent-green);padding:1px 6px;
+  border-radius:4px;font-size:.88em}
+pre{background:var(--bg-code);border:1px solid var(--border);border-radius:8px;
+  padding:14px 18px;overflow-x:auto;margin:12px 0;font-size:.84em;line-height:1.55}
+pre code{background:none;padding:0;color:#c7e8c7}
+pre .cmt{color:#6a6a8a}
+pre .hl{color:var(--accent-orange);font-weight:600}
+.badge{display:inline-block;padding:2px 10px;border-radius:12px;font-size:.72em;
+  font-weight:600;margin-right:6px}
+.badge-blue{background:rgba(79,195,247,.15);color:var(--accent-blue)}
+.badge-green{background:rgba(102,187,106,.15);color:var(--accent-green)}
+.badge-orange{background:rgba(255,152,0,.15);color:var(--accent-orange)}
+.badge-red{background:rgba(239,83,80,.15);color:var(--accent-red)}
+.badge-purple{background:rgba(206,147,216,.15);color:var(--accent-purple)}
+.lesson{border-left:4px solid var(--accent-orange);background:rgba(255,152,0,.06);
+  padding:12px 16px;border-radius:0 8px 8px 0;margin:12px 0;font-size:.93em}
+.lesson b{color:var(--accent-orange)}
+.stat-row{display:flex;gap:14px;flex-wrap:wrap;margin:16px 0}
+.stat{background:var(--bg-card);border:1px solid var(--border);border-radius:10px;
+  padding:14px 22px;text-align:center;flex:1;min-width:130px}
+.stat .n{font-size:1.7em;font-weight:700;color:var(--accent-blue)}
+.stat .t{font-size:.75em;color:var(--text-secondary)}
+img.topo{width:100%;border-radius:10px;border:1px solid var(--border);margin:12px 0}
+a{color:var(--accent-blue)}
+</style>
+</head>
+<body>
+
+<aside class="sidebar">
+  <div class="sidebar-header">
+    <h1>VXLAN EVPN Multi-AS Lab</h1>
+    <div class="subtitle">Cisco NX-OS 10.5(3) · CML 2.10<br>Multi-tenant fabric · eBGP underlay/overlay</div>
+  </div>
+  <nav>
+    <div class="navgrp">Fabric</div>
+    <a href="#overview">Overview</a>
+    <a href="#topology">Topology</a>
+    <a href="#inventory">Inventory &amp; Addressing</a>
+    <div class="navgrp">Design</div>
+    <a href="#underlay">Multi-AS eBGP Design</a>
+    <a href="#spine">Spine: VRF-less EVPN Transit</a>
+    <a href="#overlay">Overlay: L2VNI &amp; Symmetric IRB</a>
+    <a href="#anycast">Anycast Gateway &amp; HMM</a>
+    <div class="navgrp">Deep Dives</div>
+    <a href="#dhcp">DHCP Relay Deep Dive</a>
+    <a href="#security">Control-Plane Security</a>
+    <div class="navgrp">Operations</div>
+    <a href="#verification">Verification</a>
+    <a href="#lessons">Troubleshooting Journal</a>
+    <a href="#repo">Repository</a>
+  </nav>
+  <div class="sidebar-footer">
+    <a href="https://github.com/Enizaksoy" target="_blank">github.com/Enizaksoy</a><br>
+    <span style="color:var(--text-secondary)">Eniz Aksoy · CCIE #23970</span>
+  </div>
+</aside>
+
+<main class="content">
+
+<section id="overview">
+  <h2>Overview</h2>
+  <p>A complete <b>BGP EVPN VXLAN fabric</b> built on Cisco Nexus 9000v in Cisco Modeling Labs,
+  using the <b>Multi-AS (eBGP) design</b> of RFC 7938: every leaf is its own autonomous system,
+  the two spines share one AS and transport EVPN routes <i>without a single VRF or VNI configured on them</i>.</p>
+  <div class="stat-row">
+    <div class="stat"><div class="n">6</div><div class="t">NX-OS switches</div></div>
+    <div class="stat"><div class="n">5</div><div class="t">BGP autonomous systems</div></div>
+    <div class="stat"><div class="n">3</div><div class="t">tenant VRFs</div></div>
+    <div class="stat"><div class="n">6+3</div><div class="t">L2 VNIs + L3 VNIs</div></div>
+    <div class="stat"><div class="n">16</div><div class="t">hosts</div></div>
+  </div>
+  <div class="card">
+    <b>What makes this lab worth reading:</b>
+    <ul style="margin:8px 0 0 20px">
+      <li>Every design rule was <b>broken first and fixed second</b> — the troubleshooting journal documents each fault with the exact CLI evidence.</li>
+      <li>DHCP relay behavior on a stretched L2VNI was analyzed <b>at packet level</b> with Wireshark, including a live single-point-of-failure test.</li>
+      <li>All configs and verification outputs were collected <b>live from the running fabric</b>.</li>
+    </ul>
+  </div>
+</section>
+
+<section id="topology">
+  <h2>Topology</h2>
+  <img class="topo" src="docs/topology.svg" alt="Fabric topology">
+  <p>Full-mesh leaf↔spine eBGP (8 point-to-point /30 links). The DHCP server (IOL) hangs off
+  Leaf-1 on an 802.1Q trunk. Tenant hosts are lightweight Alpine Linux nodes spread across all four leaves.</p>
+</section>
+
+<section id="inventory">
+  <h2>Inventory &amp; Addressing</h2>
+  <table>
+    <tr><th>Device</th><th>Role</th><th>AS</th><th>Loopback0</th></tr>
+    <tr><td>Spine-1</td><td>eBGP transit</td><td>65000</td><td>100.1.1.1</td></tr>
+    <tr><td>Spine-2</td><td>eBGP transit</td><td>65000</td><td>100.1.1.2</td></tr>
+    <tr><td>Leaf-1</td><td>VTEP (+DHCP server trunk)</td><td>65001</td><td>1.1.1.1</td></tr>
+    <tr><td>Leaf-2</td><td>VTEP</td><td>65002</td><td>2.2.2.2</td></tr>
+    <tr><td>Leaf-3</td><td>VTEP</td><td>65003</td><td>3.3.3.3</td></tr>
+    <tr><td>Leaf-4</td><td>VTEP</td><td>65004</td><td>4.4.4.4</td></tr>
+  </table>
+  <h3>Tenant / VNI plan</h3>
+  <table>
+    <tr><th>Tenant</th><th>VLANs</th><th>L2 VNIs</th><th>L3VNI (core VLAN)</th><th>Subnets</th></tr>
+    <tr><td><span class="badge badge-blue">Customer-A</span></td><td>10, 20</td><td>10, 20</td><td>50000 (vlan 500)</td><td>172.16.10.0/24 · 172.16.20.0/24</td></tr>
+    <tr><td><span class="badge badge-green">Customer-B</span></td><td>30, 40</td><td>30, 40</td><td>50001 (vlan 501)</td><td>172.16.30.0/24 · 172.16.40.0/24</td></tr>
+    <tr><td><span class="badge badge-purple">Customer-C</span></td><td>50, 60</td><td>50, 60</td><td>50002 (vlan 502)</td><td>172.16.50.0/24 · 172.16.60.0/24</td></tr>
+  </table>
+  <p>RT scheme is manual — <code>65000:&lt;VNI&gt;</code> for L2, <code>65000:500X</code> for L3 —
+  because <code>route-target auto</code> derives <code>ASN:VNI</code>, which can never match when
+  every leaf runs a different ASN.</p>
+</section>
+
+<section id="underlay">
+  <h2>Multi-AS eBGP Design</h2>
+  <p>No IGP, no route reflectors: a single eBGP session per leaf-spine link carries both
+  <code>ipv4 unicast</code> (underlay: loopback reachability) and <code>l2vpn evpn</code> (overlay).</p>
+  <div class="grid2">
+    <div class="card">
+      <h3 style="margin-top:0">Why spines share one AS</h3>
+      <p>AS_PATH loop prevention becomes a free topology guard: a route trying to transit
+      leaf→spine→leaf→spine is rejected by the second spine (own AS in path).
+      <b>Leaves can never become transit</b> — valley-free routing enforced by numbering alone.
+      Bonus: both spines present identical AS_PATHs, so ECMP works without
+      <code>multipath-relax</code>.</p>
+    </div>
+    <div class="card">
+      <h3 style="margin-top:0">Why each leaf gets its own AS</h3>
+      <p>eBGP everywhere → no iBGP full-mesh/RR requirement; a leaf drops its own routes
+      coming back (own AS in path); and AS_PATH instantly identifies the originating leaf
+      during troubleshooting.</p>
+    </div>
+  </div>
+  <pre><code><span class="cmt">! Leaf-1 — one config block, both address families</span>
+router bgp 65001
+  router-id 1.1.1.1
+  address-family ipv4 unicast
+    redistribute direct route-map lo0
+    maximum-paths 10
+  neighbor 10.1.11.2
+    remote-as 65000
+    address-family ipv4 unicast
+    address-family l2vpn evpn
+      send-community extended</code></pre>
+</section>
+
+<section id="spine">
+  <h2>Spine: VRF-less EVPN Transit</h2>
+  <p>The spine plays the role a VRF-less route reflector plays in MPLS L3VPN —
+  <code>l2vpn evpn</code> is the exact analog of <code>vpnv4</code>:</p>
+  <table>
+    <tr><th>MPLS L3VPN</th><th>VXLAN EVPN</th><th>Purpose</th></tr>
+    <tr><td>address-family vpnv4</td><td>address-family l2vpn evpn</td><td>VPN route transport</td></tr>
+    <tr><td>RD</td><td>RD</td><td>NLRI uniqueness</td></tr>
+    <tr><td>RT extcommunity</td><td>RT extcommunity</td><td>VRF import/export tagging</td></tr>
+    <tr><td>VPN label</td><td>VNI</td><td>data-plane tenant selector</td></tr>
+    <tr><td>PE</td><td>leaf (VTEP)</td><td>encap/decap, VRFs live here</td></tr>
+    <tr><td>RR (no VRFs)</td><td>spine (no VRFs)</td><td>blind route transport</td></tr>
+  </table>
+  <p>EVPN routes sit in the spine's <b>default-VRF BGP table as opaque NLRI</b>. Three lines make it work —
+  remove any one and the fabric fails in a different, silent way:</p>
+  <pre><code>router bgp 65000
+  address-family l2vpn evpn
+    <span class="hl">retain route-target all</span>        <span class="cmt">! (1) no VRFs → default RT filter would drop ALL EVPN routes</span>
+  neighbor 10.1.11.1
+    address-family l2vpn evpn
+      <span class="hl">send-community extended</span>      <span class="cmt">! (2) RTs are extended communities</span>
+      <span class="hl">route-map unchanged out</span>      <span class="cmt">! (3) eBGP rewrites NH; NH = remote VTEP = tunnel endpoint</span>
+route-map unchanged permit 10
+  set ip next-hop unchanged</code></pre>
+  <p>In the data plane the spine only routes the <b>outer</b> IP header (VTEP loopback → VTEP loopback);
+  the VNI and inner packet are invisible to it — exactly like a P router switching labels.</p>
+</section>
+
+<section id="overlay">
+  <h2>Overlay: L2VNI &amp; Symmetric IRB</h2>
+  <h3>Per-tenant building blocks (each leaf)</h3>
+  <pre><code><span class="cmt">! -- L2VNI (one per VLAN) --</span>
+vlan 10
+  vn-segment 10
+interface nve1
+  host-reachability protocol bgp
+  source-interface loopback0
+  member vni 10
+    ingress-replication protocol bgp
+evpn
+  vni 10 l2
+    rd auto
+    route-target import 65000:10
+    route-target export 65000:10
+
+<span class="cmt">! -- L3VNI (one per tenant VRF) : THREE legs, all mandatory --</span>
+vrf context Customer-A
+  vni 50000                              <span class="cmt">! leg 1: intent</span>
+  rd auto
+  address-family ipv4 unicast
+    route-target import 65000:5000
+    route-target import 65000:5000 evpn
+    route-target export 65000:5000
+    route-target export 65000:5000 evpn
+interface nve1
+  member vni 50000 associate-vrf         <span class="cmt">! leg 2: tunnel membership</span>
+vlan 500
+  vn-segment 50000                       <span class="cmt">! leg 3: the bridge domain it rides</span>
+interface Vlan500
+  vrf member Customer-A
+  ip forward                             <span class="cmt">! no IP address — pure routing SVI</span>
+  no shutdown
+router bgp 65001
+  vrf Customer-A
+    address-family ipv4 unicast
+      redistribute direct route-map permit-all</code></pre>
+  <div class="lesson"><b>Hard-won lesson:</b> with leg 3 missing, <code>show nve vni</code> shows the
+  L3VNI <b>Down</b> and every Type-5 stays <code>invalid(EVI down)</code> — visible in the local BGP
+  table, advertised to <b>no one</b>. BGP never promises what the data plane can't deliver.</div>
+  <h3>One host, two Type-2 routes</h3>
+  <pre><code>[2]:[0]:[0]:[48]:[5254.00f6.4040]:[0]:[0.0.0.0]/216       <span class="cmt">← MAC-only  (producer: L2FWDER, label 30)</span>
+[2]:[0]:[0]:[48]:[5254.00f6.4040]:[32]:[172.16.30.1]/272  <span class="cmt">← MAC-IP    (producer: HMM, labels 30 + 50001)</span></code></pre>
+  <p>The MAC-IP flavor carries <b>two labels</b> (L2VNI + L3VNI) and <b>two RTs</b> — the signature of
+  symmetric IRB — plus the originating leaf's <b>Router MAC</b> extcommunity, used as the inner
+  Ethernet destination for routed VXLAN traffic.</p>
+</section>
+
+<section id="anycast">
+  <h2>Anycast Gateway &amp; HMM</h2>
+  <pre><code>fabric forwarding anycast-gateway-mac 0000.1111.2222   <span class="cmt">! global — identical fabric-wide</span>
+interface Vlan10
+  vrf member Customer-A
+  ip address 172.16.10.254/24                           <span class="cmt">! identical IP on every leaf</span>
+  <span class="hl">fabric forwarding mode anycast-gateway</span>                <span class="cmt">! per-SVI — the line everyone forgets</span></code></pre>
+  <p>Without the per-SVI line, two leaves claim the shared IP with <b>different system MACs</b>:</p>
+  <pre><code>%ARP-2-DUP_SRC_IP: arp Source address of packet received from 5269.d61a.1b08
+on Vlan20(nve-peer1) is duplicate of local, 172.16.20.254</code></pre>
+  <p>The source MAC being another leaf's <b>router MAC</b> (not a host MAC) pins this diagnosis. The
+  second, quieter symptom: <b>HMM</b> (Host Mobility Manager) only converts ARP entries into
+  MAC-IP Type-2 routes on anycast-mode SVIs — no anycast mode, no host routes, no ARP suppression.</p>
+  <p>The chain to remember: <code>ARP → HMM → local-host-db → L2RIB → BGP Type-2 (+/32 host route)</code>.
+  "MAC route exists but no MAC-IP" always means this chain is broken at the SVI.</p>
+</section>
+
+<section id="dhcp">
+  <h2>DHCP Relay Deep Dive</h2>
+  <p>Central DHCP server in Customer-A vlan30 territory; clients on stretched L2VNIs across four leaves.
+  Full write-up: <a href="https://github.com/Enizaksoy/Cisco-VXLAN-EVPN-Multi-AS-Lab/blob/main/docs/dhcp-relay-deep-dive.md">docs/dhcp-relay-deep-dive.md</a>.</p>
+  <h3>The relay is stateless — the state travels in the packet</h3>
+  <pre><code><span class="cmt">Server's OFFER arrives addressed to the relay's own IP (giaddr), UDP 67:</span>
+1. BOOTREPLY to my own address       → server reply
+2. read <span class="hl">giaddr</span>  → matches my Vlan40 SVI → egress interface known
+3. read <span class="hl">flags</span>   → unicast or broadcast delivery
+4. build frame: dst MAC = <span class="hl">chaddr</span>, dst IP = <span class="hl">yiaddr</span>   <span class="cmt">← NO ARP! client can't answer ARP yet</span>
+5. transmit. Nothing to remember.</code></pre>
+  <h3>Verified live: the single-relay trap</h3>
+  <p>With the relay on Leaf-2 only, hosts behind Leaf-4 still got leases — their broadcasts ride the
+  stretched L2VNI (BUM/ingress-replication) to Leaf-2. <b>It works as a side effect of flooding, not by design:</b>
+  when Leaf-2's nve went down, host-4 (own leaf perfectly healthy) lost DHCP.</p>
+  <div class="lesson"><b>"Working" ≠ "working by design".</b> Configure the relay on <i>every</i> leaf carrying
+  the VLAN, with a per-leaf unique <code>ip dhcp relay source-interface loopbackN</code> — the distributed
+  anycast gateway makes the SVI IP (giaddr) non-unique, so server replies can otherwise land on a leaf
+  with no UDP-67 listener and be silently dropped.</div>
+</section>
+
+<section id="security">
+  <h2>Control-Plane Security</h2>
+  <p>Enabling relay moves DHCP from the flood path to the <b>punt path</b>: every Discover now costs CPU.
+  Axiom: <b>anything punted to the CPU is a DoS vector.</b></p>
+  <table>
+    <tr><th>Layer</th><th>Mechanism</th><th>Effect</th></tr>
+    <tr><td>edge</td><td><code>storm-control broadcast</code></td><td>kills broadcast floods in the ASIC, before punt</td></tr>
+    <tr><td>edge</td><td>DHCP snooping (untrusted ports)</td><td>drops rogue OFFER/ACK from host ports</td></tr>
+    <tr><td>edge</td><td><code>ip dhcp snooping verify mac-address</code></td><td>frame src MAC must equal chaddr → defeats starvation tools</td></tr>
+    <tr><td>last line</td><td>CoPP <code>copp profile strict</code></td><td>per-class policers: a DHCP flood cannot starve BGP/ARP</td></tr>
+  </table>
+  <pre><code>show copp status
+show policy-map interface control-plane | include dhcp|violate   <span class="cmt">! rising 'violated' = attack signal</span></code></pre>
+  <p>CoPP's elegance is <i>isolation</i>, not prevention — the bulkhead pattern: one flooded class
+  cannot sink the ship.</p>
+</section>
+
+<section id="verification">
+  <h2>Verification</h2>
+  <p>Per-device outputs live in <a href="https://github.com/Enizaksoy/Cisco-VXLAN-EVPN-Multi-AS-Lab/tree/main/verification">verification/</a>. The four commands that tell the whole story:</p>
+  <pre><code>show nve vni                                  <span class="cmt">! every L2/L3 VNI Up, VRF bindings, orphan [--] markers</span>
+show bgp l2vpn evpn summary                   <span class="cmt">! per-neighbor Type-2/3/5 counters</span>
+show l2route evpn mac-ip all                  <span class="cmt">! HMM-produced host entries (local) + BGP (remote)</span>
+show ip route vrf Customer-A                  <span class="cmt">! /32 host routes via L3VNI, 'hmm' + 'bgp' sources</span></code></pre>
+  <h3>Lookup cheatsheet (Type-2 anatomy)</h3>
+  <pre><code>[2]:[0]:[0]:[48]:[5254.00f6.4040]:[32]:[172.16.30.1]/272
+ │   │   │   │          │           │        │
+ │   │   │   │          │           │        └ host IP
+ │   │   │   │          │           └ IP length (32=IPv4; /272 total. MAC-only shows /216)
+ │   │   │   │          └ host MAC (52:54:00 = QEMU/KVM OUI)
+ │   │   │   └ MAC length (48)
+ │   │   └ Ethernet Tag (always 0 on NX-OS)
+ │   └ ESI (0 = single-homed)
+ └ route type 2
+
+show bgp l2vpn evpn 172.16.30.1        <span class="cmt">! lookup by IP — no need to type the NLRI</span>
+show bgp l2vpn evpn 5254.00f6.4040     <span class="cmt">! lookup by MAC — returns BOTH flavors</span></code></pre>
+</section>
+
+<section id="lessons">
+  <h2>Troubleshooting Journal</h2>
+  <p>Six real faults, in the order they appeared. Full evidence in
+  <a href="https://github.com/Enizaksoy/Cisco-VXLAN-EVPN-Multi-AS-Lab/blob/main/docs/troubleshooting-journal.md">docs/troubleshooting-journal.md</a>.</p>
+  <table>
+    <tr><th>#</th><th>Fault</th><th>Fingerprint</th><th>Lesson</th></tr>
+    <tr><td>1</td><td>Type-5 generated, never advertised</td><td><code>invalid(EVI down)</code></td><td>Check source route flags before blaming the receiver</td></tr>
+    <tr><td>2</td><td>RT copy-paste typo (65000:30 under vni 50)</td><td>silent cross-tenant import</td><td>Derive RTs mechanically from VNI; diff against the scheme</td></tr>
+    <tr><td>3</td><td>vlan 503 instead of 502</td><td><code>protocol-down/link-down/admin-up</code></td><td>SVI and VLAN are separate objects — verify both</td></tr>
+    <tr><td>4</td><td>Shared SVI IP without anycast mode</td><td><code>DUP_SRC_IP</code> from an RMAC via nve-peer</td><td>Anycast mode ships in the same change window as the IP</td></tr>
+    <tr><td>5</td><td>DHCP relay on one leaf only</td><td>worked… until that leaf died</td><td>"Working" ≠ "working by design"</td></tr>
+    <tr><td>6</td><td>feature dhcp asymmetry (L2 phase)</td><td>DHCP dies at VTEP boundary, zero counters</td><td>Fabric features: every leaf or none</td></tr>
+  </table>
+  <div class="lesson"><b>Meta-lesson:</b> three of six faults were single-digit typos (30↔50, 502↔503,
+  50002↔50003). Mechanical naming schemes and config diffing beat careful typing, every time.</div>
+</section>
+
+<section id="repo">
+  <h2>Repository</h2>
+  <div class="card">
+    <p><b>GitHub:</b> <a href="https://github.com/Enizaksoy/Cisco-VXLAN-EVPN-Multi-AS-Lab">github.com/Enizaksoy/Cisco-VXLAN-EVPN-Multi-AS-Lab</a></p>
+    <pre><code>├── configs/          sanitized running-configs (6 switches)
+├── verification/     live show-command outputs per device
+├── topology/         CML 2.10 lab export — import-ready YAML
+├── docs/             design notes · DHCP deep dive · troubleshooting journal
+└── index.html        this page</code></pre>
+    <p>Import the YAML into CML 2.7.2+, boot, and the fabric comes up as documented.
+    Lab credentials: <code>cisco / cisco</code>.</p>
+  </div>
+  <p style="color:var(--text-secondary);font-size:.85em;margin-top:24px">
+    Built and debugged interactively on Cisco Modeling Labs 2.10 — configs and outputs collected live
+    from the running fabric, July 2026. · Eniz Aksoy, CCIE #23970</p>
+</section>
+
+</main>
+</body>
+</html>
