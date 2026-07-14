@@ -66,6 +66,7 @@ pre .hl{color:var(--accent-orange);font-weight:600}
   padding:14px 22px;text-align:center;flex:1;min-width:130px}
 .stat .n{font-size:1.7em;font-weight:700;color:var(--accent-blue)}
 .stat .t{font-size:.75em;color:var(--text-secondary)}
+pre.cfg{max-height:560px;overflow-y:auto}
 img.topo{width:100%;border-radius:10px;border:1px solid var(--border);margin:12px 0}
 a{color:var(--accent-blue)}
 </style>
@@ -90,6 +91,13 @@ a{color:var(--accent-blue)}
     <div class="navgrp">Deep Dives</div>
     <a href="#dhcp">DHCP Relay Deep Dive</a>
     <a href="#security">Control-Plane Security</a>
+    <div class="navgrp">Full Configurations</div>
+    <a href="#cfg-Spine-1">Spine-1</a>
+    <a href="#cfg-Spine-2">Spine-2</a>
+    <a href="#cfg-Leaf-1">Leaf-1</a>
+    <a href="#cfg-Leaf-2">Leaf-2</a>
+    <a href="#cfg-Leaf-3">Leaf-3</a>
+    <a href="#cfg-Leaf-4">Leaf-4</a>
     <div class="navgrp">Operations</div>
     <a href="#verification">Verification</a>
     <a href="#lessons">Troubleshooting Journal</a>
@@ -357,6 +365,835 @@ show bgp l2vpn evpn 5254.00f6.4040     <span class="cmt">! lookup by MAC — ret
   </table>
   <div class="lesson"><b>Meta-lesson:</b> three of six faults were single-digit typos (30↔50, 502↔503,
   50002↔50003). Mechanical naming schemes and config diffing beat careful typing, every time.</div>
+</section>
+
+<section id="fullconfig">
+  <h2>Full Configurations (Design-Relevant)</h2>
+  <p>Every configuration block that implements the design — features, VLAN↔VNI mappings,
+  tenant VRFs, SVIs, NVE interface, uplinks, BGP and the EVPN section — with platform
+  boilerplate (empty interfaces, snmp/rmon/vdc defaults) stripped for readability.
+  Raw unabridged configs: <a href="https://github.com/Enizaksoy/Cisco-VXLAN-EVPN-Multi-AS-Lab/tree/main/configs">configs/</a> (sanitized: credential hashes removed).</p>
+  <p><a href="#cfg-Spine-1"><span class="badge badge-purple">Spine-1</span></a> <a href="#cfg-Spine-2"><span class="badge badge-purple">Spine-2</span></a> <a href="#cfg-Leaf-1"><span class="badge badge-blue">Leaf-1</span></a> <a href="#cfg-Leaf-2"><span class="badge badge-blue">Leaf-2</span></a> <a href="#cfg-Leaf-3"><span class="badge badge-blue">Leaf-3</span></a> <a href="#cfg-Leaf-4"><span class="badge badge-blue">Leaf-4</span></a></p>
+</section>
+
+<section id="cfg-Spine-1">
+  <h2>Spine-1 — Configuration</h2>
+  <p><span class="badge badge-purple">AS 65000 · lo0 100.1.1.1 · VRF-less EVPN transit</span></p>
+  <pre class="cfg"><code>nv overlay evpn
+feature bgp
+feature interface-vlan
+feature nv overlay
+vlan 1
+route-map lo0 permit 10
+  match interface loopback0
+route-map unchanged permit 10
+  set ip next-hop unchanged
+interface Ethernet1/1
+  no switchport
+  ip address 10.1.11.2/30
+  no shutdown
+interface Ethernet1/2
+  no switchport
+  ip address 10.1.12.2/30
+  no shutdown
+interface Ethernet1/3
+  no switchport
+  ip address 10.1.13.2/30
+  no shutdown
+interface Ethernet1/4
+  no switchport
+  ip address 10.1.14.2/30
+  no shutdown
+interface loopback0
+  ip address 100.1.1.1/32
+router bgp 65000
+  router-id 100.1.1.1
+  address-family ipv4 unicast
+    redistribute direct route-map lo0
+  address-family l2vpn evpn
+    retain route-target all
+  neighbor 10.1.11.1
+    remote-as 65001
+    address-family ipv4 unicast
+    address-family l2vpn evpn
+      send-community
+      send-community extended
+      route-map unchanged out
+  neighbor 10.1.12.1
+    remote-as 65002
+    address-family ipv4 unicast
+    address-family l2vpn evpn
+      send-community
+      send-community extended
+      route-map unchanged out
+  neighbor 10.1.13.1
+    remote-as 65003
+    address-family ipv4 unicast
+      send-community
+      send-community extended
+    address-family l2vpn evpn
+      send-community
+      send-community extended
+      route-map unchanged out
+  neighbor 10.1.14.1
+    remote-as 65004
+    address-family ipv4 unicast
+      send-community
+      send-community extended
+    address-family l2vpn evpn
+      send-community
+      send-community extended
+      route-map unchanged out</code></pre>
+</section>
+
+<section id="cfg-Spine-2">
+  <h2>Spine-2 — Configuration</h2>
+  <p><span class="badge badge-purple">AS 65000 · lo0 100.1.1.2 · VRF-less EVPN transit</span></p>
+  <pre class="cfg"><code>nv overlay evpn
+feature bgp
+feature nv overlay
+vlan 1
+route-map unchanged permit 10
+  set ip next-hop unchanged
+interface Ethernet1/1
+  no switchport
+  ip address 10.1.21.2/30
+  no shutdown
+interface Ethernet1/2
+  no switchport
+  ip address 10.1.22.2/30
+  no shutdown
+interface Ethernet1/3
+  no switchport
+  ip address 10.1.23.2/30
+  no shutdown
+interface Ethernet1/4
+  no switchport
+  ip address 10.1.24.2/30
+  no shutdown
+interface loopback0
+  ip address 100.1.1.2/30
+router bgp 65000
+  router-id 100.1.1.2
+  address-family ipv4 unicast
+    redistribute direct route-map lo0
+  address-family l2vpn evpn
+    retain route-target all
+  neighbor 10.1.21.1
+    remote-as 65001
+    address-family ipv4 unicast
+    address-family l2vpn evpn
+      send-community
+      send-community extended
+      route-map unchanged out
+  neighbor 10.1.22.1
+    remote-as 65002
+    address-family ipv4 unicast
+    address-family l2vpn evpn
+      send-community
+      send-community extended
+      route-map unchanged out
+  neighbor 10.1.23.1
+    remote-as 65003
+    address-family ipv4 unicast
+      send-community
+      send-community extended
+    address-family l2vpn evpn
+      send-community
+      send-community extended
+      route-map unchanged out
+  neighbor 10.1.24.1
+    remote-as 65004
+    address-family ipv4 unicast
+      send-community
+      send-community extended
+    address-family l2vpn evpn
+      send-community
+      send-community extended
+      route-map unchanged out</code></pre>
+</section>
+
+<section id="cfg-Leaf-1">
+  <h2>Leaf-1 — Configuration</h2>
+  <p><span class="badge badge-blue">AS 65001 · lo0 1.1.1.1 · VTEP + DHCP server trunk</span></p>
+  <pre class="cfg"><code>nv overlay evpn
+feature bgp
+feature fabric forwarding
+feature interface-vlan
+feature vn-segment-vlan-based
+feature dhcp
+feature nv overlay
+fabric forwarding anycast-gateway-mac 0000.1111.2222
+vlan 1,10,20,30,50,500-502
+vlan 10
+  vn-segment 10
+vlan 20
+  vn-segment 20
+vlan 30
+  vn-segment 30
+vlan 50
+  vn-segment 50
+vlan 500
+  vn-segment 50000
+vlan 501
+  vn-segment 50001
+vlan 502
+  vn-segment 50002
+route-map lo0 permit 10
+  match interface loopback0
+service dhcp
+ip dhcp relay
+ipv6 dhcp relay
+vrf context Customer-A
+  vni 50000
+  rd auto
+  address-family ipv4 unicast
+    route-target import 65000:5000
+    route-target import 65000:5000 evpn
+    route-target export 65000:5000
+    route-target export 65000:5000 evpn
+vrf context Customer-B
+  vni 50001
+  rd auto
+  address-family ipv4 unicast
+    route-target import 65000:5001
+    route-target import 65000:5001 evpn
+    route-target export 65000:5001
+    route-target export 65000:5001 evpn
+vrf context Customer-C
+  vni 50002
+  rd auto
+  address-family ipv4 unicast
+    route-target import 65000:5002
+    route-target import 65000:5002 evpn
+    route-target export 65000:5002
+    route-target export 65000:5002 evpn
+interface Vlan10
+  no shutdown
+  vrf member Customer-A
+  ip address 172.16.10.254/24
+  fabric forwarding mode anycast-gateway
+interface Vlan20
+  no shutdown
+  vrf member Customer-A
+  ip address 172.16.20.254/24
+interface Vlan30
+  no shutdown
+  vrf member Customer-B
+  ip address 172.16.30.254/24
+  fabric forwarding mode anycast-gateway
+interface Vlan50
+  no shutdown
+  vrf member Customer-C
+  ip address 172.16.50.254/24
+  fabric forwarding mode anycast-gateway
+interface Vlan500
+  no shutdown
+  vrf member Customer-A
+  ip forward
+interface Vlan501
+  no shutdown
+  vrf member Customer-B
+  ip forward
+interface Vlan502
+  no shutdown
+  vrf member Customer-C
+  ip forward
+interface nve1
+  no shutdown
+  host-reachability protocol bgp
+  source-interface loopback0
+  member vni 10
+    ingress-replication protocol bgp
+  member vni 20
+    ingress-replication protocol bgp
+  member vni 30
+    ingress-replication protocol bgp
+  member vni 50
+    ingress-replication protocol bgp
+  member vni 50000 associate-vrf
+  member vni 50001 associate-vrf
+  member vni 50002 associate-vrf
+interface Ethernet1/1
+  no switchport
+  ip address 10.1.11.1/30
+  no shutdown
+interface Ethernet1/2
+  no switchport
+  ip address 10.1.21.1/30
+  no shutdown
+interface Ethernet1/3
+  switchport mode trunk
+interface Ethernet1/4
+  switchport access vlan 10
+interface Ethernet1/5
+  switchport access vlan 20
+interface Ethernet1/6
+  switchport access vlan 30
+interface Ethernet1/7
+  switchport access vlan 50
+interface loopback0
+  ip address 1.1.1.1/32
+router bgp 65001
+  router-id 1.1.1.1
+  address-family ipv4 unicast
+    redistribute direct route-map lo0
+    maximum-paths 10
+  address-family l2vpn evpn
+  neighbor 10.1.11.2
+    remote-as 65000
+    address-family ipv4 unicast
+    address-family l2vpn evpn
+      send-community extended
+  neighbor 10.1.21.2
+    remote-as 65000
+    address-family ipv4 unicast
+    address-family l2vpn evpn
+      send-community extended
+  vrf Customer-A
+    address-family ipv4 unicast
+      redistribute direct route-map permit-all
+      maximum-paths 10
+  vrf Customer-B
+    address-family ipv4 unicast
+      redistribute direct route-map permit-all
+      maximum-paths 10
+  vrf Customer-C
+    address-family ipv4 unicast
+      redistribute direct route-map permit-all
+      maximum-paths 10
+evpn
+  vni 10 l2
+    rd auto
+    route-target import 65000:10
+    route-target export 65000:10
+  vni 20 l2
+    rd auto
+    route-target import 65000:20
+    route-target export 65000:20
+  vni 30 l2
+    rd auto
+    route-target import 65000:30
+    route-target export 65000:30
+  vni 50 l2
+    rd auto
+    route-target import 65000:50
+    route-target export 65000:50</code></pre>
+</section>
+
+<section id="cfg-Leaf-2">
+  <h2>Leaf-2 — Configuration</h2>
+  <p><span class="badge badge-blue">AS 65002 · lo0 2.2.2.2 · VTEP</span></p>
+  <pre class="cfg"><code>nv overlay evpn
+feature bgp
+feature fabric forwarding
+feature interface-vlan
+feature vn-segment-vlan-based
+feature dhcp
+feature nv overlay
+fabric forwarding anycast-gateway-mac 0000.1111.2222
+vlan 1,10,20,40,60,500-502
+vlan 10
+  vn-segment 10
+vlan 20
+  vn-segment 20
+vlan 40
+  vn-segment 40
+vlan 60
+  vn-segment 60
+vlan 500
+  vn-segment 50000
+vlan 501
+  vn-segment 50001
+vlan 502
+  vn-segment 50002
+route-map lo0 permit 10
+  match interface loopback0
+service dhcp
+ip dhcp relay
+ipv6 dhcp relay
+vrf context Customer-A
+  vni 50000
+  rd auto
+  address-family ipv4 unicast
+    route-target import 65000:5000
+    route-target import 65000:5000 evpn
+    route-target export 65000:5000
+    route-target export 65000:5000 evpn
+vrf context Customer-B
+  vni 50001
+  rd auto
+  address-family ipv4 unicast
+    route-target import 65000:5001
+    route-target import 65000:5001 evpn
+    route-target export 65000:5001
+    route-target export 65000:5001 evpn
+vrf context Customer-C
+  vni 50002
+  rd auto
+  address-family ipv4 unicast
+    route-target import 65000:5002
+    route-target import 65000:5002 evpn
+    route-target export 65000:5002
+    route-target export 65000:5002 evpn
+interface Vlan10
+  no shutdown
+  vrf member Customer-A
+  ip address 172.16.10.254/24
+  fabric forwarding mode anycast-gateway
+interface Vlan20
+  no shutdown
+  vrf member Customer-A
+  ip address 172.16.20.254/24
+interface Vlan40
+  no shutdown
+  vrf member Customer-B
+  ip address 172.16.40.254/24
+  fabric forwarding mode anycast-gateway
+  ip dhcp relay address 172.16.30.200
+interface Vlan60
+  no shutdown
+  vrf member Customer-C
+  ip address 172.16.60.254/24
+  fabric forwarding mode anycast-gateway
+  ip dhcp relay address 172.16.50.200
+interface Vlan500
+  no shutdown
+  vrf member Customer-A
+  ip forward
+interface Vlan501
+  no shutdown
+  vrf member Customer-B
+  ip forward
+interface Vlan502
+  no shutdown
+  vrf member Customer-C
+  ip forward
+interface nve1
+  no shutdown
+  host-reachability protocol bgp
+  source-interface loopback0
+  member vni 10
+    ingress-replication protocol bgp
+  member vni 20
+    ingress-replication protocol bgp
+  member vni 40
+    ingress-replication protocol bgp
+  member vni 60
+    ingress-replication protocol bgp
+  member vni 50000 associate-vrf
+  member vni 50001 associate-vrf
+  member vni 50002 associate-vrf
+interface Ethernet1/1
+  no switchport
+  ip address 10.1.12.1/30
+  no shutdown
+interface Ethernet1/2
+  no switchport
+  ip address 10.1.22.1/30
+  no shutdown
+interface Ethernet1/4
+  switchport access vlan 10
+interface Ethernet1/5
+  switchport access vlan 20
+interface Ethernet1/6
+  switchport access vlan 40
+interface Ethernet1/7
+  switchport access vlan 60
+interface loopback0
+  ip address 2.2.2.2/32
+router bgp 65002
+  router-id 2.2.2.2
+  address-family ipv4 unicast
+    redistribute direct route-map lo0
+    maximum-paths 10
+  address-family l2vpn evpn
+  neighbor 10.1.12.2
+    remote-as 65000
+    address-family ipv4 unicast
+    address-family l2vpn evpn
+      send-community
+      send-community extended
+  neighbor 10.1.22.2
+    remote-as 65000
+    address-family ipv4 unicast
+    address-family l2vpn evpn
+      send-community
+      send-community extended
+  vrf Customer-A
+    address-family ipv4 unicast
+      redistribute direct route-map permit-all
+      maximum-paths 10
+  vrf Customer-B
+    address-family ipv4 unicast
+      redistribute direct route-map permit-all
+      maximum-paths 10
+  vrf Customer-C
+    address-family ipv4 unicast
+      redistribute direct route-map permit-all
+      maximum-paths 10
+evpn
+  vni 10 l2
+    rd auto
+    route-target import 65000:10
+    route-target export 65000:10
+  vni 20 l2
+    rd auto
+    route-target import 65000:20
+    route-target export 65000:20
+  vni 40 l2
+    rd auto
+    route-target import 65000:40
+    route-target export 65000:40
+  vni 60 l2
+    rd auto
+    route-target import 65000:60
+    route-target export 65000:60</code></pre>
+</section>
+
+<section id="cfg-Leaf-3">
+  <h2>Leaf-3 — Configuration</h2>
+  <p><span class="badge badge-blue">AS 65003 · lo0 3.3.3.3 · VTEP</span></p>
+  <pre class="cfg"><code>nv overlay evpn
+feature bgp
+feature fabric forwarding
+feature interface-vlan
+feature vn-segment-vlan-based
+feature dhcp
+feature nv overlay
+fabric forwarding anycast-gateway-mac 0000.1111.2222
+vlan 1,10,20,30,50,500-502
+vlan 10
+  vn-segment 10
+vlan 20
+  vn-segment 20
+vlan 30
+  vn-segment 30
+vlan 50
+  vn-segment 50
+vlan 500
+  vn-segment 50000
+vlan 501
+  vn-segment 50001
+vlan 502
+  vn-segment 50002
+route-map lo0 permit 10
+  match interface loopback0
+service dhcp
+ip dhcp relay
+ipv6 dhcp relay
+vrf context Customer-A
+  vni 50000
+  rd auto
+  address-family ipv4 unicast
+    route-target import 65000:5000
+    route-target import 65000:5000 evpn
+    route-target export 65000:5000
+    route-target export 65000:5000 evpn
+vrf context Customer-B
+  vni 50001
+  rd auto
+  address-family ipv4 unicast
+    route-target import 65000:5001
+    route-target import 65000:5001 evpn
+    route-target export 65000:5001
+    route-target export 65000:5001 evpn
+vrf context Customer-C
+  vni 50002
+  rd auto
+  address-family ipv4 unicast
+    route-target import 65000:5002
+    route-target import 65000:5002 evpn
+    route-target export 65000:5002
+    route-target export 65000:5002 evpn
+interface Vlan10
+  no shutdown
+  vrf member Customer-A
+  ip address 172.16.10.254/24
+  fabric forwarding mode anycast-gateway
+interface Vlan20
+  no shutdown
+  vrf member Customer-A
+  ip address 172.16.20.254/24
+interface Vlan30
+  no shutdown
+  vrf member Customer-B
+  ip address 172.16.30.254/24
+  fabric forwarding mode anycast-gateway
+interface Vlan50
+  no shutdown
+  vrf member Customer-C
+  ip address 172.16.50.254/24
+  fabric forwarding mode anycast-gateway
+interface Vlan500
+  no shutdown
+  vrf member Customer-A
+  ip forward
+interface Vlan501
+  no shutdown
+  vrf member Customer-B
+  ip forward
+interface Vlan502
+  no shutdown
+  vrf member Customer-C
+  ip forward
+interface nve1
+  no shutdown
+  host-reachability protocol bgp
+  source-interface loopback0
+  member vni 10
+    ingress-replication protocol bgp
+  member vni 20
+    ingress-replication protocol bgp
+  member vni 30
+    ingress-replication protocol bgp
+  member vni 50
+    ingress-replication protocol bgp
+  member vni 50000 associate-vrf
+  member vni 50001 associate-vrf
+  member vni 50002 associate-vrf
+  member vni 50003 associate-vrf
+interface Ethernet1/1
+  no switchport
+  ip address 10.1.13.1/30
+  no shutdown
+interface Ethernet1/2
+  no switchport
+  ip address 10.1.23.1/30
+  no shutdown
+interface Ethernet1/4
+  switchport access vlan 10
+interface Ethernet1/5
+  switchport access vlan 20
+interface Ethernet1/6
+  switchport access vlan 30
+interface Ethernet1/7
+  switchport access vlan 50
+interface loopback0
+  ip address 3.3.3.3/32
+router bgp 65003
+  router-id 3.3.3.3
+  address-family ipv4 unicast
+    redistribute direct route-map lo0
+    maximum-paths 10
+  address-family l2vpn evpn
+  neighbor 10.1.13.2
+    remote-as 65000
+    address-family ipv4 unicast
+      send-community
+      send-community extended
+    address-family l2vpn evpn
+      send-community
+      send-community extended
+  neighbor 10.1.23.2
+    remote-as 65000
+    address-family ipv4 unicast
+      send-community
+      send-community extended
+    address-family l2vpn evpn
+      send-community
+      send-community extended
+  vrf Customer-A
+    address-family ipv4 unicast
+      redistribute direct route-map permit-all
+      maximum-paths 10
+  vrf Customer-B
+    address-family ipv4 unicast
+      redistribute direct route-map permit-all
+      maximum-paths 10
+  vrf Customer-C
+    address-family ipv4 unicast
+      redistribute direct route-map permit-all
+      maximum-paths 10
+evpn
+  vni 10 l2
+    rd auto
+    route-target import 65000:10
+    route-target export 65000:10
+  vni 20 l2
+    rd auto
+    route-target import 65000:20
+    route-target export 65000:20
+  vni 30 l2
+    rd auto
+    route-target import 65000:30
+    route-target export 65000:30
+  vni 50 l2
+    rd auto
+    route-target import 65000:50
+    route-target export 65000:50</code></pre>
+</section>
+
+<section id="cfg-Leaf-4">
+  <h2>Leaf-4 — Configuration</h2>
+  <p><span class="badge badge-blue">AS 65004 · lo0 4.4.4.4 · VTEP</span></p>
+  <pre class="cfg"><code>nv overlay evpn
+feature bgp
+feature fabric forwarding
+feature interface-vlan
+feature vn-segment-vlan-based
+feature dhcp
+feature nv overlay
+fabric forwarding anycast-gateway-mac 0000.1111.2222
+vlan 1,10,20,40,60,500-502
+vlan 10
+  vn-segment 10
+vlan 20
+  vn-segment 20
+vlan 40
+  vn-segment 40
+vlan 60
+  vn-segment 60
+vlan 500
+  vn-segment 50000
+vlan 501
+  vn-segment 50001
+vlan 502
+  vn-segment 50002
+route-map lo0 permit 10
+  match interface loopback0
+service dhcp
+ip dhcp relay
+ipv6 dhcp relay
+vrf context Customer-A
+  vni 50000
+  rd auto
+  address-family ipv4 unicast
+    route-target import 65000:5000
+    route-target import 65000:5000 evpn
+    route-target export 65000:5000
+    route-target export 65000:5000 evpn
+vrf context Customer-B
+  vni 50001
+  rd auto
+  address-family ipv4 unicast
+    route-target import 65000:5001
+    route-target import 65000:5001 evpn
+    route-target export 65000:5001
+    route-target export 65000:5001 evpn
+vrf context Customer-C
+  vni 50002
+  rd auto
+  address-family ipv4 unicast
+    route-target import 65000:5002
+    route-target import 65000:5002 evpn
+    route-target export 65000:5002
+    route-target export 65000:5002 evpn
+interface Vlan10
+  no shutdown
+  vrf member Customer-A
+  ip address 172.16.10.254/24
+  fabric forwarding mode anycast-gateway
+interface Vlan20
+  no shutdown
+  vrf member Customer-A
+  ip address 172.16.20.254/24
+interface Vlan40
+  no shutdown
+  vrf member Customer-B
+  ip address 172.16.40.254/24
+  fabric forwarding mode anycast-gateway
+interface Vlan60
+  no shutdown
+  vrf member Customer-C
+  ip address 172.16.60.254/24
+  fabric forwarding mode anycast-gateway
+  ip dhcp relay address 172.16.50.200
+interface Vlan500
+  no shutdown
+  vrf member Customer-A
+  ip forward
+interface Vlan501
+  no shutdown
+  vrf member Customer-B
+  ip forward
+interface Vlan502
+  no shutdown
+  vrf member Customer-C
+  ip forward
+interface nve1
+  no shutdown
+  host-reachability protocol bgp
+  source-interface loopback0
+  member vni 10
+    ingress-replication protocol bgp
+  member vni 20
+    ingress-replication protocol bgp
+  member vni 40
+    ingress-replication protocol bgp
+  member vni 60
+    ingress-replication protocol bgp
+  member vni 50000 associate-vrf
+  member vni 50001 associate-vrf
+  member vni 50002 associate-vrf
+interface Ethernet1/1
+  no switchport
+  ip address 10.1.14.1/30
+  no shutdown
+interface Ethernet1/2
+  no switchport
+  ip address 10.1.24.1/30
+  no shutdown
+interface Ethernet1/4
+  switchport access vlan 10
+interface Ethernet1/5
+  switchport access vlan 20
+interface Ethernet1/6
+  switchport access vlan 40
+interface Ethernet1/7
+  switchport access vlan 60
+interface loopback0
+  ip address 4.4.4.4/32
+router bgp 65004
+  router-id 4.4.4.4
+  address-family ipv4 unicast
+    redistribute direct route-map lo0
+  address-family l2vpn evpn
+  neighbor 10.1.14.2
+    remote-as 65000
+    address-family ipv4 unicast
+      send-community
+      send-community extended
+    address-family l2vpn evpn
+      send-community
+      send-community extended
+  neighbor 10.1.24.2
+    remote-as 65000
+    address-family ipv4 unicast
+      send-community
+      send-community extended
+    address-family l2vpn evpn
+      send-community
+      send-community extended
+  vrf Customer-A
+    address-family ipv4 unicast
+      redistribute direct route-map permit-all
+      maximum-paths 10
+  vrf Customer-B
+    address-family ipv4 unicast
+      redistribute direct route-map permit-all
+      maximum-paths 10
+  vrf Customer-C
+    address-family ipv4 unicast
+      redistribute direct route-map permit-all
+      maximum-paths 10
+evpn
+  vni 10 l2
+    rd auto
+    route-target import 65000:10
+    route-target export 65000:10
+  vni 20 l2
+    rd auto
+    route-target import 65000:20
+    route-target export 65000:20
+  vni 40 l2
+    rd auto
+    route-target import 65000:40
+    route-target export 65000:40
+  vni 60 l2
+    rd auto
+    route-target import 65000:60
+    route-target export 65000:60</code></pre>
 </section>
 
 <section id="repo">
