@@ -22,26 +22,26 @@ nve1      50003    n/a               Down  CP   L3 [--]
 show nve peers
 Interface Peer-IP                                 State LearnType Uptime   Router-Mac       
 --------- --------------------------------------  ----- --------- -------- -----------------
-nve1      1.1.1.1                                 Up    CP        06:34:25 52ac.fa5e.1b08   
-nve1      2.2.2.2                                 Up    CP        06:34:32 529a.5b2c.1b08   
-nve1      4.4.4.4                                 Up    CP        06:34:22 52e4.6548.1b08   
+nve1      1.1.1.1                                 Up    CP        03:32:41 52ac.fa5e.1b08   
+nve1      2.2.2.2                                 Up    CP        03:32:40 529a.5b2c.1b08   
+nve1      4.4.4.4                                 Up    CP        03:32:40 52e4.6548.1b08   
 
 Leaf-3# 
 show bgp l2vpn evpn summary
 BGP summary information for VRF default, address family L2VPN EVPN
 BGP router identifier 3.3.3.3, local AS number 65003
-BGP table version is 598, L2VPN EVPN config peers 2, capable peers 2
-87 network entries and 137 paths using 32084 bytes of memory
-BGP attribute entries [75/27600], BGP AS path entries [3/30]
+BGP table version is 341, L2VPN EVPN config peers 2, capable peers 2
+91 network entries and 142 paths using 33540 bytes of memory
+BGP attribute entries [82/30176], BGP AS path entries [3/30]
 BGP community entries [0/0], BGP clusterlist entries [0/0]
 
 Neighbor        V    AS    MsgRcvd    MsgSent   TblVer  InQ OutQ Up/Down  State/PfxRcd
-10.1.13.2       4 65000        577        404      598    0    0 06:34:41 40        
-10.1.23.2       4 65000        579        405      598    0    0 06:34:35 40        
+10.1.13.2       4 65000        317        221      341    0    0 03:32:48 41        
+10.1.23.2       4 65000        318        221      341    0    0 03:32:48 41        
 
 Neighbor        T    AS Type-1     Type-2     Type-3     Type-4     Type-5     Type-6     Type-7     Type-8     Type-12   
-10.1.13.2       I 65000 0          20         8          0          12         0          0          0          0         
-10.1.23.2       I 65000 0          20         8          0          12         0          0          0          0         
+10.1.13.2       I 65000 0          21         8          0          12         0          0          0          0         
+10.1.23.2       I 65000 0          21         8          0          12         0          0          0          0         
 Leaf-3# 
 show l2route evpn mac-ip all
 Flags -(Rmac):Router MAC (Stt):Static (L):Local (R):Remote 
@@ -56,10 +56,11 @@ NH Flags- (Asy): Asymmetric VNI
 Topology    Mac Address    Host IP                                 Prod   Flags              Seq No     Next-Hops                              
 ----------- -------------- --------------------------------------- ------ ----------------- ---------- ---------------------------------------------------------
 10          5254.003c.332e 172.16.10.2                             BGP    --                 0         1.1.1.1 (Label: 10)
+10          5254.0077.3424 172.16.10.3                             HMM    L,                 0         Local                                  
+10          5254.0076.8589 172.16.10.4                             BGP    --                 0         4.4.4.4 (Label: 10)
 10          aabb.cc00.1020 172.16.10.200                           BGP    --                 0         1.1.1.1 (Label: 10)
 30          5254.00f6.4040 172.16.30.1                             BGP    --                 0         1.1.1.1 (Label: 30)
 30          aabb.cc00.1020 172.16.30.200                           BGP    --                 0         1.1.1.1 (Label: 30)
-50          5254.0026.889b 172.16.50.1                             BGP    --                 0         1.1.1.1 (Label: 50)
 50          aabb.cc00.1020 172.16.50.200                           BGP    --                 0         1.1.1.1 (Label: 50)
 Leaf-3# 
 show ip route vrf Customer-A
@@ -70,19 +71,24 @@ IP Route Table for VRF "Customer-A"
 '%<string>' in via output denotes VRF <string>
 
 172.16.10.0/24, ubest/mbest: 1/0, attached
-    *via 172.16.10.254, Vlan10, [0/0], 06:36:40, direct
+    *via 172.16.10.254, Vlan10, [0/0], 03:34:47, direct
 172.16.10.2/32, ubest/mbest: 1/0
-    *via 1.1.1.1%default, [20/0], 04:20:39, bgp-65003, external, tag 65000, segid: 50000 tunnelid: 0x1010101 encap: VXLAN
+    *via 1.1.1.1%default, [20/0], 00:24:08, bgp-65003, external, tag 65000, segid: 50000 tunnelid: 0x1010101 encap: VXLAN
+ 
+172.16.10.3/32, ubest/mbest: 1/0, attached
+    *via 172.16.10.3, Vlan10, [190/0], 00:20:37, hmm
+172.16.10.4/32, ubest/mbest: 1/0
+    *via 4.4.4.4%default, [20/0], 00:20:56, bgp-65003, external, tag 65000, segid: 50000 tunnelid: 0x4040404 encap: VXLAN
  
 172.16.10.200/32, ubest/mbest: 1/0
-    *via 1.1.1.1%default, [20/0], 06:34:34, bgp-65003, external, tag 65000, segid: 50000 tunnelid: 0x1010101 encap: VXLAN
+    *via 1.1.1.1%default, [20/0], 03:32:47, bgp-65003, external, tag 65000, segid: 50000 tunnelid: 0x1010101 encap: VXLAN
  
 172.16.10.254/32, ubest/mbest: 1/0, attached
-    *via 172.16.10.254, Vlan10, [0/0], 06:36:40, local
+    *via 172.16.10.254, Vlan10, [0/0], 03:34:47, local
 172.16.20.0/24, ubest/mbest: 1/0, attached
-    *via 172.16.20.254, Vlan20, [0/0], 06:36:40, direct
+    *via 172.16.20.254, Vlan20, [0/0], 03:34:47, direct
 172.16.20.254/32, ubest/mbest: 1/0, attached
-    *via 172.16.20.254, Vlan20, [0/0], 06:36:40, local
+    *via 172.16.20.254, Vlan20, [0/0], 03:34:47, local
 
 Leaf-3# 
 show ip route vrf Customer-B
@@ -93,23 +99,23 @@ IP Route Table for VRF "Customer-B"
 '%<string>' in via output denotes VRF <string>
 
 172.16.30.0/24, ubest/mbest: 1/0, attached
-    *via 172.16.30.254, Vlan30, [0/0], 06:36:43, direct
+    *via 172.16.30.254, Vlan30, [0/0], 03:34:50, direct
 172.16.30.1/32, ubest/mbest: 1/0
-    *via 1.1.1.1%default, [20/0], 04:36:47, bgp-65003, external, tag 65000, segid: 50001 tunnelid: 0x1010101 encap: VXLAN
+    *via 1.1.1.1%default, [20/0], 00:14:23, bgp-65003, external, tag 65000, segid: 50001 tunnelid: 0x1010101 encap: VXLAN
  
 172.16.30.200/32, ubest/mbest: 1/0
-    *via 1.1.1.1%default, [20/0], 06:34:33, bgp-65003, external, tag 65000, segid: 50001 tunnelid: 0x1010101 encap: VXLAN
+    *via 1.1.1.1%default, [20/0], 03:32:41, bgp-65003, external, tag 65000, segid: 50001 tunnelid: 0x1010101 encap: VXLAN
  
 172.16.30.254/32, ubest/mbest: 1/0, attached
-    *via 172.16.30.254, Vlan30, [0/0], 06:36:43, local
+    *via 172.16.30.254, Vlan30, [0/0], 03:34:50, local
 172.16.40.0/24, ubest/mbest: 1/0
-    *via 2.2.2.2%default, [20/0], 06:34:37, bgp-65003, external, tag 65000, segid: 50001 tunnelid: 0x2020202 encap: VXLAN
+    *via 2.2.2.2%default, [20/0], 03:32:51, bgp-65003, external, tag 65000, segid: 50001 tunnelid: 0x2020202 encap: VXLAN
  
 172.16.40.1/32, ubest/mbest: 1/0
-    *via 2.2.2.2%default, [20/0], 06:34:17, bgp-65003, external, tag 65000, segid: 50001 tunnelid: 0x2020202 encap: VXLAN
+    *via 2.2.2.2%default, [20/0], 03:32:22, bgp-65003, external, tag 65000, segid: 50001 tunnelid: 0x2020202 encap: VXLAN
  
 172.16.40.2/32, ubest/mbest: 1/0
-    *via 4.4.4.4%default, [20/0], 06:34:08, bgp-65003, external, tag 65000, segid: 50001 tunnelid: 0x4040404 encap: VXLAN
+    *via 4.4.4.4%default, [20/0], 03:32:16, bgp-65003, external, tag 65000, segid: 50001 tunnelid: 0x4040404 encap: VXLAN
  
 
 Leaf-3# 
@@ -121,23 +127,20 @@ IP Route Table for VRF "Customer-C"
 '%<string>' in via output denotes VRF <string>
 
 172.16.50.0/24, ubest/mbest: 1/0, attached
-    *via 172.16.50.254, Vlan50, [0/0], 06:36:45, direct
-172.16.50.1/32, ubest/mbest: 1/0
-    *via 1.1.1.1%default, [20/0], 00:06:45, bgp-65003, external, tag 65000, segid: 50002 tunnelid: 0x1010101 encap: VXLAN
- 
+    *via 172.16.50.254, Vlan50, [0/0], 03:34:53, direct
 172.16.50.200/32, ubest/mbest: 1/0
-    *via 1.1.1.1%default, [20/0], 00:06:45, bgp-65003, external, tag 65000, segid: 50002 tunnelid: 0x1010101 encap: VXLAN
+    *via 1.1.1.1%default, [20/0], 03:32:56, bgp-65003, external, tag 65000, segid: 50002 tunnelid: 0x1010101 encap: VXLAN
  
 172.16.50.254/32, ubest/mbest: 1/0, attached
-    *via 172.16.50.254, Vlan50, [0/0], 06:36:45, local
+    *via 172.16.50.254, Vlan50, [0/0], 03:34:53, local
 172.16.60.0/24, ubest/mbest: 1/0
-    *via 2.2.2.2%default, [20/0], 06:34:39, bgp-65003, external, tag 65000, segid: 50002 tunnelid: 0x2020202 encap: VXLAN
+    *via 2.2.2.2%default, [20/0], 03:32:54, bgp-65003, external, tag 65000, segid: 50002 tunnelid: 0x2020202 encap: VXLAN
  
 172.16.60.1/32, ubest/mbest: 1/0
-    *via 2.2.2.2%default, [20/0], 04:44:54, bgp-65003, external, tag 65000, segid: 50002 tunnelid: 0x2020202 encap: VXLAN
+    *via 2.2.2.2%default, [20/0], 03:32:47, bgp-65003, external, tag 65000, segid: 50002 tunnelid: 0x2020202 encap: VXLAN
  
 172.16.60.2/32, ubest/mbest: 1/0
-    *via 4.4.4.4%default, [20/0], 04:44:48, bgp-65003, external, tag 65000, segid: 50002 tunnelid: 0x4040404 encap: VXLAN
+    *via 4.4.4.4%default, [20/0], 03:32:35, bgp-65003, external, tag 65000, segid: 50002 tunnelid: 0x4040404 encap: VXLAN
  
 
 Leaf-3# 

@@ -86,6 +86,30 @@ carrying the VLAN, with a per-leaf unique `source-interface` (see the DHCP deep 
 boundary *without any counters* — ARP floods fine, DHCP doesn't (sup-redirect grabs
 UDP 67/68). Fabric features must be symmetric: on every leaf or on none.
 
+## 7. One-way route leaking (Internet VRF phase)
+
+**Symptom:** tenant host's pings reached the internet router (request *and* reply visible
+on the router), host saw timeouts.
+
+**Root cause:** the Internet VRF imported only one tenant's RT (`65000:5001`); the tested
+tenant's return route (172.16.10.0/24, RT 65000:5000) was never imported — replies died
+at the border leaf. Every leak direction is an independent import: hub needs one import
+line per tenant.
+
+**Bonus find while diagnosing:** `redistribute direct route-map all` referenced a
+route-map that didn't exist yet — NX-OS then redistributes *nothing*, silently. The
+connected 172.16.111.0/30 never became a Type-5 until the map was defined.
+
+## 8. `network 0.0.0.0/0` without a RIB default
+
+**Symptom:** default route configured under the VRF's BGP AF, never advertised.
+
+**Evidence:** `l0.0.0.0/0` present in `show bgp vrf Internet ipv4` but with **no `*>`** —
+the network statement only picks up a route that already exists in the RIB. Adding
+`ip route 0.0.0.0/0 172.16.111.2` under the VRF context made it valid, advertised — and
+immediately opened tenant-to-tenant transit through the border leaf (see the route-leaking
+doc, rule d).
+
 ## Meta-lessons
 
 - Small integers are the enemy: three of six faults were single-digit typos (30↔50,

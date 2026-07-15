@@ -90,6 +90,7 @@ a{color:var(--accent-blue)}
     <a href="#anycast">Anycast Gateway &amp; HMM</a>
     <div class="navgrp">Deep Dives</div>
     <a href="#dhcp">DHCP Relay Deep Dive</a>
+    <a href="#leaking">Route Leaking &amp; DSVNI</a>
     <a href="#security">Control-Plane Security</a>
     <div class="navgrp">Full Configurations</div>
     <a href="#cfg-Spine-1">Spine-1</a>
@@ -311,6 +312,47 @@ on Vlan20(nve-peer1) is duplicate of local, 172.16.20.254</code></pre>
   with no UDP-67 listener and be silently dropped.</div>
 </section>
 
+<section id="leaking">
+  <h2>Route Leaking &amp; DSVNI</h2>
+  <p>Centralized internet access: a shared <b>Internet VRF that exists on the border leaf only</b>
+  (Leaf-4, L3VNI 50010), reached by all tenants through RT-based route leaking.
+  Full write-up: <a href="https://github.com/Enizaksoy/Cisco-VXLAN-EVPN-Multi-AS-Lab/blob/main/docs/route-leaking-dsvni.md">docs/route-leaking-dsvni.md</a>.</p>
+  <h3>The RT scheme (hub-and-spoke extranet)</h3>
+  <pre><code>vrf context Internet                          <span class="cmt">! border leaf only</span>
+  vni 50010
+  ip route 0.0.0.0/0 172.16.111.2             <span class="cmt">! toward the internet router</span>
+  address-family ipv4 unicast
+    <span class="hl">route-target import 65000:5000 evpn</span>       <span class="cmt">! one import per tenant — return paths</span>
+    <span class="hl">route-target import 65000:5001 evpn</span>
+    <span class="hl">route-target import 65000:5002 evpn</span>
+    route-target export 65000:5010
+
+vrf context Customer-A                        <span class="cmt">! every tenant, every leaf</span>
+  address-family ipv4 unicast
+    <span class="hl">route-target import 65000:5010 evpn</span>       <span class="cmt">! receive the leaked default</span></code></pre>
+  <h3>Downstream VNI, proven live</h3>
+  <p>Tenant leaves import routes carrying <b>label 50010 — a VNI they don't have</b>. NX-OS
+  encapsulates with the VNI advertised by the egress VTEP (downstream assignment, exactly like
+  MPLS VPN labels) and marks it in the RIB:</p>
+  <pre><code>Leaf-4# show ip route vrf Internet
+172.16.10.0/24 ... segid: 50000 <span class="hl">(Asymmetric)</span> ... encap: VXLAN
+172.16.30.0/24 ... segid: 50001 <span class="hl">(Asymmetric)</span> ... encap: VXLAN
+172.16.50.0/24 ... segid: 50002 <span class="hl">(Asymmetric)</span> ... encap: VXLAN</code></pre>
+  <div class="lesson"><b>Not the same as "asymmetric IRB"!</b> Asymmetric IRB (RFC 9135) is an IRB
+  forwarding model with no L3VNI — ingress routes straight into the destination's L2VNI, and the
+  two directions of a flow ride different VNIs. NX-OS implements symmetric IRB only. DSVNI lives
+  <i>inside</i> symmetric IRB: what's asymmetric is the <b>VNI numbers of two VRFs</b> exchanging
+  leaked routes, not the two directions of a flow.</div>
+  <h3>Four rules this phase proved</h3>
+  <table>
+    <tr><th>Rule</th><th>How it showed itself</th></tr>
+    <tr><td>Every leak direction is an independent import</td><td>Hub imported only one tenant's RT → that tenant worked, the other's replies died at the border leaf</td></tr>
+    <tr><td>RTs stick at origination — no cascading</td><td>Tenant A never saw tenant B's routes through the hub; isolation survives leaking by design</td></tr>
+    <tr><td><code>network 0.0.0.0/0</code> needs a RIB route</td><td>Default sat in BGP without <code>*&gt;</code> until the static route existed</td></tr>
+    <tr><td>A leaked default re-opens tenant transit</td><td>The moment 0/0 became valid, A→B hairpinned through the border leaf — isolation must move to policy (ACL/firewall)</td></tr>
+  </table>
+</section>
+
 <section id="security">
   <h2>Control-Plane Security</h2>
   <p>Enabling relay moves DHCP from the flood path to the <b>punt path</b>: every Discover now costs CPU.
@@ -362,6 +404,8 @@ show bgp l2vpn evpn 5254.00f6.4040     <span class="cmt">! lookup by MAC — ret
     <tr><td>4</td><td>Shared SVI IP without anycast mode</td><td><code>DUP_SRC_IP</code> from an RMAC via nve-peer</td><td>Anycast mode ships in the same change window as the IP</td></tr>
     <tr><td>5</td><td>DHCP relay on one leaf only</td><td>worked… until that leaf died</td><td>"Working" ≠ "working by design"</td></tr>
     <tr><td>6</td><td>feature dhcp asymmetry (L2 phase)</td><td>DHCP dies at VTEP boundary, zero counters</td><td>Fabric features: every leaf or none</td></tr>
+    <tr><td>7</td><td>One-way route leaking</td><td>request+reply on the server, timeout on the host</td><td>Hub VRF: one import line per tenant — count them</td></tr>
+    <tr><td>8</td><td>network 0.0.0.0/0 without a RIB default</td><td><code>l0.0.0.0/0</code> with no <code>*&gt;</code></td><td>Status column beats prefix column</td></tr>
   </table>
   <div class="lesson"><b>Meta-lesson:</b> three of six faults were single-digit typos (30↔50, 502↔503,
   50002↔50003). Mechanical naming schemes and config diffing beat careful typing, every time.</div>
@@ -550,6 +594,7 @@ vrf context Customer-A
   address-family ipv4 unicast
     route-target import 65000:5000
     route-target import 65000:5000 evpn
+    route-target import 65000:5010 evpn
     route-target export 65000:5000
     route-target export 65000:5000 evpn
 vrf context Customer-B
@@ -558,6 +603,8 @@ vrf context Customer-B
   address-family ipv4 unicast
     route-target import 65000:5001
     route-target import 65000:5001 evpn
+    route-target import 65000:5010
+    route-target import 65000:5010 evpn
     route-target export 65000:5001
     route-target export 65000:5001 evpn
 vrf context Customer-C
@@ -1035,7 +1082,7 @@ feature vn-segment-vlan-based
 feature dhcp
 feature nv overlay
 fabric forwarding anycast-gateway-mac 0000.1111.2222
-vlan 1,10,20,40,60,500-502
+vlan 1,10,20,40,60,500-502,510-511
 vlan 10
   vn-segment 10
 vlan 20
@@ -1050,6 +1097,9 @@ vlan 501
   vn-segment 50001
 vlan 502
   vn-segment 50002
+vlan 510
+  name internet
+  vn-segment 50010
 route-map lo0 permit 10
   match interface loopback0
 service dhcp
@@ -1079,6 +1129,16 @@ vrf context Customer-C
     route-target import 65000:5002 evpn
     route-target export 65000:5002
     route-target export 65000:5002 evpn
+vrf context Internet
+  vni 50010
+  ip route 0.0.0.0/0 172.16.111.2
+  rd auto
+  address-family ipv4 unicast
+    route-target import 65000:5000 evpn
+    route-target import 65000:5001 evpn
+    route-target import 65000:5002 evpn
+    route-target export 65000:5010
+    route-target export 65000:5010 evpn
 interface Vlan10
   no shutdown
   vrf member Customer-A
@@ -1111,6 +1171,14 @@ interface Vlan502
   no shutdown
   vrf member Customer-C
   ip forward
+interface Vlan510
+  no shutdown
+  vrf member Internet
+  ip forward
+interface Vlan511
+  no shutdown
+  vrf member Internet
+  ip address 172.16.111.1/30
 interface nve1
   no shutdown
   host-reachability protocol bgp
@@ -1126,6 +1194,7 @@ interface nve1
   member vni 50000 associate-vrf
   member vni 50001 associate-vrf
   member vni 50002 associate-vrf
+  member vni 50010 associate-vrf
 interface Ethernet1/1
   no switchport
   ip address 10.1.14.1/30
@@ -1134,6 +1203,8 @@ interface Ethernet1/2
   no switchport
   ip address 10.1.24.1/30
   no shutdown
+interface Ethernet1/3
+  switchport access vlan 511
 interface Ethernet1/4
   switchport access vlan 10
 interface Ethernet1/5
@@ -1177,6 +1248,10 @@ router bgp 65004
     address-family ipv4 unicast
       redistribute direct route-map permit-all
       maximum-paths 10
+  vrf Internet
+    address-family ipv4 unicast
+      network 0.0.0.0/0
+      redistribute direct route-map all
 evpn
   vni 10 l2
     rd auto

@@ -1,0 +1,71 @@
+show ip route vrf Customer-A 0.0.0.0
+                                     ^
+% Invalid command at '^' marker.
+Leaf-1# 
+show ip route vrf Customer-A 172.16.111.2
+                                     ^
+% Invalid command at '^' marker.
+Leaf-1# 
+show bgp l2vpn evpn 172.16.111.0
+BGP routing table information for VRF default, address family L2VPN EVPN
+Route Distinguisher: 4.4.4.4:7
+BGP routing table entry for [5]:[0]:[0]:[30]:[172.16.111.0]/224, version 251
+Paths: (2 available, best #2)
+Flags: (0x000002) (high32 00000000) on xmit-list, is not in l2rib/evpn, is not in HW
+
+  Path type: external, path is valid, not best reason: Router Id, no labeled nexthop
+  Gateway IP: 0.0.0.0
+  AS-Path: 65000 65004 , path sourced external to AS
+    4.4.4.4 (metric 0) from 10.1.21.2 (100.1.1.2)
+      Origin incomplete, MED not set, localpref 100, weight 0
+      Received label 50010
+      Extcommunity: RT:65000:5010 ENCAP:8 Router MAC:52e4.6548.1b08
+
+  Advertised path-id 1
+  Path type: external, path is valid, is best path, no labeled nexthop
+             Imported to 4 destination(s)
+             Imported paths list: Customer-A L3-50001 Customer-B L3-50000
+  Gateway IP: 0.0.0.0
+  AS-Path: 65000 65004 , path sourced external to AS
+    4.4.4.4 (metric 0) from 10.1.11.2 (100.1.1.1)
+      Origin incomplete, MED not set, localpref 100, weight 0
+      Received label 50010
+      Extcommunity: RT:65000:5010 ENCAP:8 Router MAC:52e4.6548.1b08
+
+  Path-id 1 not advertised to any peer
+
+Route Distinguisher: 1.1.1.1:4    (L3VNI 50000)
+BGP routing table entry for [5]:[0]:[0]:[30]:[172.16.111.0]/224, version 252
+Paths: (1 available, best #1)
+Flags: (0x000002) (high32 00000000) on xmit-list, is not in l2rib/evpn, is not in HW
+
+  Advertised path-id 1
+  Path type: external, path is valid, is best path, no labeled nexthop
+             Imported from 4.4.4.4:7:[5]:[0]:[0]:[30]:[172.16.111.0]/224 
+  Gateway IP: 0.0.0.0
+  AS-Path: 65000 65004 , path sourced external to AS
+    4.4.4.4 (metric 0) from 10.1.11.2 (100.1.1.1)
+      Origin incomplete, MED not set, localpref 100, weight 0
+      Received label 50010
+      Extcommunity: RT:65000:5010 ENCAP:8 Router MAC:52e4.6548.1b08
+
+  Path-id 1 not advertised to any peer
+
+Route Distinguisher: 1.1.1.1:5    (L3VNI 50001)
+BGP routing table entry for [5]:[0]:[0]:[30]:[172.16.111.0]/224, version 279
+Paths: (1 available, best #1)
+Flags: (0x000002) (high32 00000000) on xmit-list, is not in l2rib/evpn, is not in HW
+
+  Advertised path-id 1
+  Path type: external, path is valid, is best path, no labeled nexthop
+             Imported from 4.4.4.4:7:[5]:[0]:[0]:[30]:[172.16.111.0]/224 
+  Gateway IP: 0.0.0.0
+  AS-Path: 65000 65004 , path sourced external to AS
+    4.4.4.4 (metric 0) from 10.1.11.2 (100.1.1.1)
+      Origin incomplete, MED not set, localpref 100, weight 0
+      Received label 50010
+      Extcommunity: RT:65000:5010 ENCAP:8 Router MAC:52e4.6548.1b08
+
+  Path-id 1 not advertised to any peer
+
+Leaf-1# 

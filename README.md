@@ -13,6 +13,7 @@ A complete **BGP EVPN VXLAN fabric** built on Cisco Nexus 9000v (NX-OS 10.5.3) i
 - **Multi-tenancy**: 3 customer VRFs with symmetric IRB (L2VNI + L3VNI per tenant)
 - **Distributed anycast gateway** on every leaf (`fabric forwarding mode anycast-gateway`)
 - **Centralized DHCP server** reached via VRF-aware DHCP relay — including a packet-level analysis of why a single relay "works" on a stretched L2VNI and why it must not be designed that way
+- **Centralized internet access via RT route leaking** — a shared Internet VRF on the border leaf only, with **Downstream VNI (DSVNI)** proven live (`segid ... (Asymmetric)` in the RIB)
 - **Real troubleshooting journal**: every fault we hit (and fixed) is documented with the exact show-command evidence
 
 ## Tenant / VNI plan
@@ -22,6 +23,7 @@ A complete **BGP EVPN VXLAN fabric** built on Cisco Nexus 9000v (NX-OS 10.5.3) i
 | Customer-A | 10, 20 | 10, 20 | 50000 (vlan 500) | 172.16.10.0/24, 172.16.20.0/24 |
 | Customer-B | 30, 40 | 30, 40 | 50001 (vlan 501) | 172.16.30.0/24, 172.16.40.0/24 |
 | Customer-C | 50, 60 | 50, 60 | 50002 (vlan 502) | 172.16.50.0/24, 172.16.60.0/24 |
+| Internet (shared) | 511 (border only) | — | 50010 (vlan 510) | 172.16.111.0/30 → internet router |
 
 Route-target scheme (manual — `auto` derives `ASN:VNI` and never matches across different leaf ASNs in a Multi-AS design):
 

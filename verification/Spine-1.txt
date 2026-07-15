@@ -1,27 +1,27 @@
 show bgp l2vpn evpn summary
 BGP summary information for VRF default, address family L2VPN EVPN
 BGP router identifier 100.1.1.1, local AS number 65000
-BGP table version is 306, L2VPN EVPN config peers 4, capable peers 4
-59 network entries and 59 paths using 21476 bytes of memory
-BGP attribute entries [49/18032], BGP AS path entries [4/24]
+BGP table version is 230, L2VPN EVPN config peers 4, capable peers 4
+64 network entries and 64 paths using 23296 bytes of memory
+BGP attribute entries [55/20240], BGP AS path entries [4/24]
 BGP community entries [0/0], BGP clusterlist entries [0/0]
 
 Neighbor        V    AS    MsgRcvd    MsgSent   TblVer  InQ OutQ Up/Down  State/PfxRcd
-10.1.11.1       4 65001        465        416      306    0    0 06:33:15 21        
-10.1.12.1       4 65002        442        415      306    0    0 06:33:16 13        
-10.1.13.1       4 65003        437        412      306    0    0 06:33:19 11        
-10.1.14.1       4 65004        440        419      306    0    0 06:33:14 14        
+10.1.11.1       4 65001        264        224      230    0    0 03:31:24 20        
+10.1.12.1       4 65002        245        221      230    0    0 03:31:29 14        
+10.1.13.1       4 65003        245        221      230    0    0 03:31:26 13        
+10.1.14.1       4 65004        252        224      230    0    0 03:31:29 17        
 
 Neighbor        T    AS Type-1     Type-2     Type-3     Type-4     Type-5     Type-6     Type-7     Type-8     Type-12   
-10.1.11.1       I 65001 0          13         4          0          4          0          0          0          0         
-10.1.12.1       I 65002 0          5          4          0          4          0          0          0          0         
-10.1.13.1       I 65003 0          3          4          0          4          0          0          0          0         
-10.1.14.1       I 65004 0          6          4          0          4          0          0          0          0         
+10.1.11.1       I 65001 0          12         4          0          4          0          0          0          0         
+10.1.12.1       I 65002 0          6          4          0          4          0          0          0          0         
+10.1.13.1       I 65003 0          5          4          0          4          0          0          0          0         
+10.1.14.1       I 65004 0          7          4          0          6          0          0          0          0         
 Spine-1# 
 show bgp l2vpn evpn route-type 5
 BGP routing table information for VRF default, address family L2VPN EVPN
 Route Distinguisher: 1.1.1.1:4
-BGP routing table entry for [5]:[0]:[0]:[24]:[172.16.10.0]/224, version 40
+BGP routing table entry for [5]:[0]:[0]:[24]:[172.16.10.0]/224, version 75
 Paths: (1 available, best #1)
 Flags: (0x000002) (high32 00000000) on xmit-list, is not in l2rib/evpn, is not in HW
 
@@ -36,7 +36,7 @@ Flags: (0x000002) (high32 00000000) on xmit-list, is not in l2rib/evpn, is not i
 
   Path-id 1 advertised to peers:
     10.1.12.1          10.1.13.1          10.1.14.1      
-BGP routing table entry for [5]:[0]:[0]:[24]:[172.16.20.0]/224, version 41
+BGP routing table entry for [5]:[0]:[0]:[24]:[172.16.20.0]/224, version 76
 Paths: (1 available, best #1)
 Flags: (0x000002) (high32 00000000) on xmit-list, is not in l2rib/evpn, is not in HW
 
@@ -53,7 +53,7 @@ Flags: (0x000002) (high32 00000000) on xmit-list, is not in l2rib/evpn, is not i
     10.1.12.1          10.1.13.1          10.1.14.1      
 
 Route Distinguisher: 1.1.1.1:5
-BGP routing table entry for [5]:[0]:[0]:[24]:[172.16.30.0]/224, version 42
+BGP routing table entry for [5]:[0]:[0]:[24]:[172.16.30.0]/224, version 77
 Paths: (1 available, best #1)
 Flags: (0x000002) (high32 00000000) on xmit-list, is not in l2rib/evpn, is not in HW
 
@@ -70,7 +70,7 @@ Flags: (0x000002) (high32 00000000) on xmit-list, is not in l2rib/evpn, is not i
     10.1.12.1          10.1.13.1          10.1.14.1      
 
 Route Distinguisher: 1.1.1.1:6
-BGP routing table entry for [5]:[0]:[0]:[24]:[172.16.50.0]/224, version 43
+BGP routing table entry for [5]:[0]:[0]:[24]:[172.16.50.0]/224, version 78
 Paths: (1 available, best #1)
 Flags: (0x000002) (high32 00000000) on xmit-list, is not in l2rib/evpn, is not in HW
 
@@ -87,7 +87,7 @@ Flags: (0x000002) (high32 00000000) on xmit-list, is not in l2rib/evpn, is not i
     10.1.12.1          10.1.13.1          10.1.14.1      
 
 Route Distinguisher: 2.2.2.2:4
-BGP routing table entry for [5]:[0]:[0]:[24]:[172.16.10.0]/224, version 32
+BGP routing table entry for [5]:[0]:[0]:[24]:[172.16.10.0]/224, version 49
 Paths: (1 available, best #1)
 Flags: (0x000002) (high32 00000000) on xmit-list, is not in l2rib/evpn, is not in HW
 
@@ -102,7 +102,7 @@ Flags: (0x000002) (high32 00000000) on xmit-list, is not in l2rib/evpn, is not i
 
   Path-id 1 advertised to peers:
     10.1.11.1          10.1.13.1          10.1.14.1      
-BGP routing table entry for [5]:[0]:[0]:[24]:[172.16.20.0]/224, version 33
+BGP routing table entry for [5]:[0]:[0]:[24]:[172.16.20.0]/224, version 50
 Paths: (1 available, best #1)
 Flags: (0x000002) (high32 00000000) on xmit-list, is not in l2rib/evpn, is not in HW
 
@@ -119,7 +119,7 @@ Flags: (0x000002) (high32 00000000) on xmit-list, is not in l2rib/evpn, is not i
     10.1.11.1          10.1.13.1          10.1.14.1      
 
 Route Distinguisher: 2.2.2.2:5
-BGP routing table entry for [5]:[0]:[0]:[24]:[172.16.40.0]/224, version 34
+BGP routing table entry for [5]:[0]:[0]:[24]:[172.16.40.0]/224, version 51
 Paths: (1 available, best #1)
 Flags: (0x000002) (high32 00000000) on xmit-list, is not in l2rib/evpn, is not in HW
 
@@ -136,7 +136,7 @@ Flags: (0x000002) (high32 00000000) on xmit-list, is not in l2rib/evpn, is not i
     10.1.11.1          10.1.13.1          10.1.14.1      
 
 Route Distinguisher: 2.2.2.2:6
-BGP routing table entry for [5]:[0]:[0]:[24]:[172.16.60.0]/224, version 35
+BGP routing table entry for [5]:[0]:[0]:[24]:[172.16.60.0]/224, version 52
 Paths: (1 available, best #1)
 Flags: (0x000002) (high32 00000000) on xmit-list, is not in l2rib/evpn, is not in HW
 
@@ -153,7 +153,7 @@ Flags: (0x000002) (high32 00000000) on xmit-list, is not in l2rib/evpn, is not i
     10.1.11.1          10.1.13.1          10.1.14.1      
 
 Route Distinguisher: 3.3.3.3:4
-BGP routing table entry for [5]:[0]:[0]:[24]:[172.16.10.0]/224, version 49
+BGP routing table entry for [5]:[0]:[0]:[24]:[172.16.10.0]/224, version 67
 Paths: (1 available, best #1)
 Flags: (0x000002) (high32 00000000) on xmit-list, is not in l2rib/evpn, is not in HW
 
@@ -168,7 +168,7 @@ Flags: (0x000002) (high32 00000000) on xmit-list, is not in l2rib/evpn, is not i
 
   Path-id 1 advertised to peers:
     10.1.11.1          10.1.12.1          10.1.14.1      
-BGP routing table entry for [5]:[0]:[0]:[24]:[172.16.20.0]/224, version 50
+BGP routing table entry for [5]:[0]:[0]:[24]:[172.16.20.0]/224, version 68
 Paths: (1 available, best #1)
 Flags: (0x000002) (high32 00000000) on xmit-list, is not in l2rib/evpn, is not in HW
 
@@ -185,7 +185,7 @@ Flags: (0x000002) (high32 00000000) on xmit-list, is not in l2rib/evpn, is not i
     10.1.11.1          10.1.12.1          10.1.14.1      
 
 Route Distinguisher: 3.3.3.3:5
-BGP routing table entry for [5]:[0]:[0]:[24]:[172.16.30.0]/224, version 51
+BGP routing table entry for [5]:[0]:[0]:[24]:[172.16.30.0]/224, version 69
 Paths: (1 available, best #1)
 Flags: (0x000002) (high32 00000000) on xmit-list, is not in l2rib/evpn, is not in HW
 
@@ -202,7 +202,7 @@ Flags: (0x000002) (high32 00000000) on xmit-list, is not in l2rib/evpn, is not i
     10.1.11.1          10.1.12.1          10.1.14.1      
 
 Route Distinguisher: 3.3.3.3:6
-BGP routing table entry for [5]:[0]:[0]:[24]:[172.16.50.0]/224, version 52
+BGP routing table entry for [5]:[0]:[0]:[24]:[172.16.50.0]/224, version 70
 Paths: (1 available, best #1)
 Flags: (0x000002) (high32 00000000) on xmit-list, is not in l2rib/evpn, is not in HW
 
@@ -219,7 +219,7 @@ Flags: (0x000002) (high32 00000000) on xmit-list, is not in l2rib/evpn, is not i
     10.1.11.1          10.1.12.1          10.1.14.1      
 
 Route Distinguisher: 4.4.4.4:4
-BGP routing table entry for [5]:[0]:[0]:[24]:[172.16.10.0]/224, version 73
+BGP routing table entry for [5]:[0]:[0]:[24]:[172.16.10.0]/224, version 59
 Paths: (1 available, best #1)
 Flags: (0x000002) (high32 00000000) on xmit-list, is not in l2rib/evpn, is not in HW
 
@@ -234,7 +234,7 @@ Flags: (0x000002) (high32 00000000) on xmit-list, is not in l2rib/evpn, is not i
 
   Path-id 1 advertised to peers:
     10.1.11.1          10.1.12.1          10.1.13.1      
-BGP routing table entry for [5]:[0]:[0]:[24]:[172.16.20.0]/224, version 74
+BGP routing table entry for [5]:[0]:[0]:[24]:[172.16.20.0]/224, version 60
 Paths: (1 available, best #1)
 Flags: (0x000002) (high32 00000000) on xmit-list, is not in l2rib/evpn, is not in HW
 
@@ -251,7 +251,7 @@ Flags: (0x000002) (high32 00000000) on xmit-list, is not in l2rib/evpn, is not i
     10.1.11.1          10.1.12.1          10.1.13.1      
 
 Route Distinguisher: 4.4.4.4:5
-BGP routing table entry for [5]:[0]:[0]:[24]:[172.16.40.0]/224, version 75
+BGP routing table entry for [5]:[0]:[0]:[24]:[172.16.40.0]/224, version 61
 Paths: (1 available, best #1)
 Flags: (0x000002) (high32 00000000) on xmit-list, is not in l2rib/evpn, is not in HW
 
@@ -268,7 +268,7 @@ Flags: (0x000002) (high32 00000000) on xmit-list, is not in l2rib/evpn, is not i
     10.1.11.1          10.1.12.1          10.1.13.1      
 
 Route Distinguisher: 4.4.4.4:6
-BGP routing table entry for [5]:[0]:[0]:[24]:[172.16.60.0]/224, version 76
+BGP routing table entry for [5]:[0]:[0]:[24]:[172.16.60.0]/224, version 62
 Paths: (1 available, best #1)
 Flags: (0x000002) (high32 00000000) on xmit-list, is not in l2rib/evpn, is not in HW
 
@@ -280,6 +280,38 @@ Flags: (0x000002) (high32 00000000) on xmit-list, is not in l2rib/evpn, is not i
       Origin incomplete, MED 0, localpref 100, weight 0
       Received label 50002
       Extcommunity: RT:65000:5002 ENCAP:8 Router MAC:52e4.6548.1b08
+
+  Path-id 1 advertised to peers:
+    10.1.11.1          10.1.12.1          10.1.13.1      
+
+Route Distinguisher: 4.4.4.4:7
+BGP routing table entry for [5]:[0]:[0]:[0]:[0.0.0.0]/224, version 228
+Paths: (1 available, best #1)
+Flags: (0x000002) (high32 00000000) on xmit-list, is not in l2rib/evpn, is not in HW
+
+  Advertised path-id 1
+  Path type: external, path is valid, is best path, no labeled nexthop
+  Gateway IP: 0.0.0.0
+  AS-Path: 65004 , path sourced external to AS
+    4.4.4.4 (metric 0) from 10.1.14.1 (4.4.4.4)
+      Origin IGP, MED not set, localpref 100, weight 0
+      Received label 50010
+      Extcommunity: RT:65000:5010 ENCAP:8 Router MAC:52e4.6548.1b08
+
+  Path-id 1 advertised to peers:
+    10.1.11.1          10.1.12.1          10.1.13.1      
+BGP routing table entry for [5]:[0]:[0]:[30]:[172.16.111.0]/224, version 210
+Paths: (1 available, best #1)
+Flags: (0x000002) (high32 00000000) on xmit-list, is not in l2rib/evpn, is not in HW
+
+  Advertised path-id 1
+  Path type: external, path is valid, is best path, no labeled nexthop
+  Gateway IP: 0.0.0.0
+  AS-Path: 65004 , path sourced external to AS
+    4.4.4.4 (metric 0) from 10.1.14.1 (4.4.4.4)
+      Origin incomplete, MED 0, localpref 100, weight 0
+      Received label 50010
+      Extcommunity: RT:65000:5010 ENCAP:8 Router MAC:52e4.6548.1b08
 
   Path-id 1 advertised to peers:
     10.1.11.1          10.1.12.1          10.1.13.1      

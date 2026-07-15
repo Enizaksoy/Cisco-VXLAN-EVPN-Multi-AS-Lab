@@ -1,0 +1,108 @@
+show run vrf Internet
+
+!Command: show running-config vrf Internet
+!Running configuration last done at: Wed Jul 15 16:44:06 2026
+!Time: Wed Jul 15 16:49:01 2026
+
+version 10.5(3) Bios:version  
+
+interface Vlan510
+  vrf member Internet
+
+interface Vlan511
+  vrf member Internet
+vrf context Internet
+  vni 50010
+  ip route 0.0.0.0/0 172.16.111.2
+  rd auto
+  address-family ipv4 unicast
+    route-target import 65000:5000 evpn
+    route-target import 65000:5001 evpn
+    route-target import 65000:5002 evpn
+    route-target export 65000:5010
+    route-target export 65000:5010 evpn
+router bgp 65004
+  vrf Internet
+    address-family ipv4 unicast
+      network 0.0.0.0/0
+      redistribute direct route-map all
+
+
+Leaf-4# 
+show ip route vrf Internet
+IP Route Table for VRF "Internet"
+'*' denotes best ucast next-hop
+'**' denotes best mcast next-hop
+'[x/y]' denotes [preference/metric]
+'%<string>' in via output denotes VRF <string>
+
+0.0.0.0/0, ubest/mbest: 1/0
+    *via 172.16.111.2, [1/0], 00:04:58, static
+172.16.10.0/24, ubest/mbest: 1/0
+    *via 3.3.3.3%default, [20/0], 00:12:40, bgp-65004, external, tag 65000, segid: 50000 (Asymmetric) tunnelid: 0x3030303 encap: VXLAN
+ 
+172.16.10.2/32, ubest/mbest: 1/0
+    *via 1.1.1.1%default, [20/0], 00:12:40, bgp-65004, external, tag 65000, segid: 50000 (Asymmetric) tunnelid: 0x1010101 encap: VXLAN
+ 
+172.16.10.3/32, ubest/mbest: 1/0
+    *via 3.3.3.3%default, [20/0], 00:12:40, bgp-65004, external, tag 65000, segid: 50000 (Asymmetric) tunnelid: 0x3030303 encap: VXLAN
+ 
+172.16.10.200/32, ubest/mbest: 1/0
+    *via 1.1.1.1%default, [20/0], 00:12:40, bgp-65004, external, tag 65000, segid: 50000 (Asymmetric) tunnelid: 0x1010101 encap: VXLAN
+ 
+172.16.20.0/24, ubest/mbest: 1/0
+    *via 3.3.3.3%default, [20/0], 00:12:40, bgp-65004, external, tag 65000, segid: 50000 (Asymmetric) tunnelid: 0x3030303 encap: VXLAN
+ 
+172.16.30.0/24, ubest/mbest: 1/0
+    *via 3.3.3.3%default, [20/0], 00:34:41, bgp-65004, external, tag 65000, segid: 50001 (Asymmetric) tunnelid: 0x3030303 encap: VXLAN
+ 
+172.16.30.1/32, ubest/mbest: 1/0
+    *via 1.1.1.1%default, [20/0], 00:11:59, bgp-65004, external, tag 65000, segid: 50001 (Asymmetric) tunnelid: 0x1010101 encap: VXLAN
+ 
+172.16.30.200/32, ubest/mbest: 1/0
+    *via 1.1.1.1%default, [20/0], 00:34:41, bgp-65004, external, tag 65000, segid: 50001 (Asymmetric) tunnelid: 0x1010101 encap: VXLAN
+ 
+172.16.40.0/24, ubest/mbest: 1/0
+    *via 2.2.2.2%default, [20/0], 00:34:41, bgp-65004, external, tag 65000, segid: 50001 (Asymmetric) tunnelid: 0x2020202 encap: VXLAN
+ 
+172.16.40.1/32, ubest/mbest: 1/0
+    *via 2.2.2.2%default, [20/0], 00:34:41, bgp-65004, external, tag 65000, segid: 50001 (Asymmetric) tunnelid: 0x2020202 encap: VXLAN
+ 
+172.16.50.0/24, ubest/mbest: 1/0
+    *via 3.3.3.3%default, [20/0], 00:10:13, bgp-65004, external, tag 65000, segid: 50002 (Asymmetric) tunnelid: 0x3030303 encap: VXLAN
+ 
+172.16.50.200/32, ubest/mbest: 1/0
+    *via 1.1.1.1%default, [20/0], 00:10:13, bgp-65004, external, tag 65000, segid: 50002 (Asymmetric) tunnelid: 0x1010101 encap: VXLAN
+ 
+172.16.60.0/24, ubest/mbest: 1/0
+    *via 2.2.2.2%default, [20/0], 00:10:13, bgp-65004, external, tag 65000, segid: 50002 (Asymmetric) tunnelid: 0x2020202 encap: VXLAN
+ 
+172.16.60.1/32, ubest/mbest: 1/0
+    *via 2.2.2.2%default, [20/0], 00:10:13, bgp-65004, external, tag 65000, segid: 50002 (Asymmetric) tunnelid: 0x2020202 encap: VXLAN
+ 
+172.16.111.0/30, ubest/mbest: 1/0, attached
+    *via 172.16.111.1, Vlan511, [0/0], 00:31:18, direct
+172.16.111.1/32, ubest/mbest: 1/0, attached
+    *via 172.16.111.1, Vlan511, [0/0], 00:31:18, local
+
+Leaf-4# 
+show bgp l2vpn evpn 0.0.0.0
+BGP routing table information for VRF default, address family L2VPN EVPN
+Route Distinguisher: 4.4.4.4:7    (L3VNI 50010)
+BGP routing table entry for [5]:[0]:[0]:[0]:[0.0.0.0]/224, version 314
+Paths: (1 available, best #1)
+Flags: (0x000002) (high32 00000000) on xmit-list, is not in l2rib/evpn
+
+  Advertised path-id 1
+  Path type: local, path is valid, is best path, no labeled nexthop
+  Gateway IP: 0.0.0.0
+  AS-Path: NONE, path locally originated
+    4.4.4.4 (metric 0) from 0.0.0.0 (4.4.4.4)
+      Origin IGP, MED not set, localpref 100, weight 32768
+      Received label 50010
+      Extcommunity: RT:65000:5010 ENCAP:8 Router MAC:52e4.6548.1b08
+
+  Path-id 1 advertised to peers:
+    10.1.14.2          10.1.24.2      
+
+Leaf-4# 
